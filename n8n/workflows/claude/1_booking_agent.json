@@ -16,7 +16,14 @@
         "httpMethod": "POST",
         "path": "eb-booking",
         "responseMode": "lastNode",
+        "authentication": "headerAuth",
         "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ebHookAuth000001",
+          "name": "Webhook token (X-Internal-Token)"
+        }
       },
       "webhookId": "bb69470e-a8dc-513f-bbaf-ec3da305999f"
     },

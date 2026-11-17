@@ -45,6 +45,9 @@ def money(v):
 
 templates.env.filters["money"] = money
 templates.env.filters["md"] = lambda t: md.markdown(t or "", extensions=["nl2br"])
+# Админ «Агентууд» хуудасны холбоосууд (сервер дээр .env-ээр өөрчилнө)
+templates.env.globals["N8N_PUBLIC_URL"] = os.environ.get("N8N_PUBLIC_URL", "http://localhost:47678")
+templates.env.globals["MAILBOX_URL"] = os.environ.get("MAILBOX_URL", "http://localhost:47825")
 templates.env.globals["COMPANY"] = {
     "name": "Энержи Баланс ХХК",
     "slogan": "Эрчим хүчний зохистой хэрэглээ — Бизнесийн амжилт",
@@ -58,11 +61,13 @@ app.include_router(admin_router)
 
 @app.on_event("startup")
 def ensure_admin():
+    db.init_schema(os.environ.get("DB_INIT_DIR", "/app/db_init"))
     email = os.environ.get("ADMIN_EMAIL", "admin@energybalance.local")
     pw = os.environ.get("ADMIN_PASSWORD", "EnergyBalance2026")
     if not db.one("SELECT id FROM admin_users WHERE email=%s", (email,)):
         h = bcrypt.hashpw(pw.encode(), bcrypt.gensalt()).decode()
-        db.run("INSERT INTO admin_users (email, name, password_hash) VALUES (%s,%s,%s)", (email, "Админ", h))
+        db.run("INSERT INTO admin_users (email, name, password_hash) VALUES (%s,%s,%s) ON CONFLICT (email) DO NOTHING",
+               (email, "Админ", h))
 
 
 # ---------- Агент 1: захиалга баталгаажуулах ----------

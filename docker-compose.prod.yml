@@ -1,0 +1,38 @@
+# Сервер (Oracle Cloud VM) дээрх тохиргоо — локал docker-compose.yml дээр давхарлана:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Гаднаас зөвхөн 80/443 (Caddy, автомат HTTPS) нээлттэй; DB, n8n, Mailpit-ийн порт хаалттай.
+
+services:
+  db:
+    ports: !reset []
+
+  mailpit:
+    ports: !reset []
+
+  n8n:
+    ports: !reset []
+
+  web:
+    image: ${WEB_IMAGE:-ghcr.io/daze17/energy-balance-web:latest}
+    command: !reset null   # Dockerfile-ийн production CMD (reload-гүй, 2 worker)
+    volumes: !reset []     # код image дотор
+    ports: !reset []
+
+  caddy:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?SITE_DOMAIN-г .env-д бичнэ үү}
+      N8N_DOMAIN: ${N8N_DOMAIN:?N8N_DOMAIN-г .env-д бичнэ үү}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - eb_caddy:/data
+    depends_on:
+      - web
+      - n8n
+
+volumes:
+  eb_caddy:

@@ -45,9 +45,9 @@ services:
       TZ: Asia/Ulaanbaatar
       N8N_DIAGNOSTICS_ENABLED: "false"
       N8N_PERSONALIZATION_ENABLED: "false"
-      N8N_SECURE_COOKIE: "false"
-      N8N_EDITOR_BASE_URL: http://localhost:47678
-      WEBHOOK_URL: http://localhost:47678/
+      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE:-false}
+      N8N_EDITOR_BASE_URL: ${N8N_PUBLIC_URL:-http://localhost:47678}
+      WEBHOOK_URL: ${N8N_PUBLIC_URL:-http://localhost:47678}/
       N8N_RUNNERS_ENABLED: "true"
       LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
@@ -58,6 +58,12 @@ services:
       MAIL_FROM: ${MAIL_FROM:-info@energybalance.local}
       STAFF_EMAIL: ${STAFF_EMAIL:-manager@energybalance.local}
       INTERNAL_TOKEN: ${INTERNAL_TOKEN:-local-internal-token}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_DISABLE_STARTTLS: ${SMTP_DISABLE_STARTTLS:-true}
     volumes:
       - eb_n8n:/home/node/.n8n
       - ./n8n:/bootstrap:ro
@@ -83,9 +89,16 @@ services:
       retries: 40
 
   web:
-    build: ./web
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    image: ${WEB_IMAGE:-energy-balance-web:local}
     restart: unless-stopped
+    # Локал хөгжүүлэлт: код өөрчлөгдөхөд автоматаар дахин ачаална (серверт docker-compose.prod.yml үүнийг солино)
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "/app/app"]
     environment:
+      N8N_PUBLIC_URL: ${N8N_PUBLIC_URL:-http://localhost:47678}
+      MAILBOX_URL: ${MAILBOX_URL:-http://localhost:47825}
       DATABASE_URL: postgresql://eb:${DB_PASSWORD:-eb_local_pass}@db:5432/energybalance
       N8N_WEBHOOK_BASE: http://n8n:5678/webhook
       SESSION_SECRET: ${SESSION_SECRET:-local-dev-session-secret}

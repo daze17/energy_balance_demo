@@ -1,0 +1,15 @@
+# Caddy — Let's Encrypt HTTPS сертификатыг автоматаар авч, шинэчилнэ.
+
+# Нүүр хуудас + админ самбар + чатбот API
+{$SITE_DOMAIN} {
+	encode gzip
+	reverse_proxy web:8000
+}
+
+# n8n editor (owner нэвтрэлтээр хамгаалагдсан)
+{$N8N_DOMAIN} {
+	# Webhook-уудыг гаднаас хаана: агентуудыг зөвхөн вэб сервер дотоод сүлжээгээр дууддаг
+	@hooks path /webhook/* /webhook-test/* /webhook-waiting/*
+	respond @hooks 404
+	reverse_proxy n8n:5678
+}

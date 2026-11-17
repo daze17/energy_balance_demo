@@ -16,7 +16,14 @@
         "httpMethod": "POST",
         "path": "eb-energy",
         "responseMode": "responseNode",
+        "authentication": "headerAuth",
         "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ebHookAuth000001",
+          "name": "Webhook token (X-Internal-Token)"
+        }
       },
       "webhookId": "03de65cc-b8d7-5f97-b29d-da4698c9ab4c"
     },

@@ -4,10 +4,10 @@
     "name": "Energy Balance DB",
     "type": "postgres",
     "data": {
-      "host": "db",
-      "port": 5432,
-      "database": "energybalance",
-      "user": "eb",
+      "host": "__DB_HOST__",
+      "port": __DB_PORT__,
+      "database": "__DB_NAME__",
+      "user": "__DB_USER__",
       "password": "__DB_PASSWORD__",
       "ssl": "disable",
       "allowUnauthorizedCerts": false
@@ -15,15 +15,15 @@
   },
   {
     "id": "ebSmtpMailpit001",
-    "name": "Mailpit SMTP (Gmail-ийн орлуулагч)",
+    "name": "SMTP и-мэйл (локал: Mailpit, сервер: Gmail)",
     "type": "smtp",
     "data": {
-      "user": "",
-      "password": "",
-      "host": "mailpit",
-      "port": 1025,
-      "secure": false,
-      "disableStartTls": true
+      "user": "__SMTP_USER__",
+      "password": "__SMTP_PASSWORD__",
+      "host": "__SMTP_HOST__",
+      "port": __SMTP_PORT__,
+      "secure": __SMTP_SECURE__,
+      "disableStartTls": __SMTP_DISABLE_STARTTLS__
     }
   },
   {
@@ -33,6 +33,15 @@
     "data": {
       "apiKey": "__ANTHROPIC_API_KEY__",
       "url": "https://api.anthropic.com"
+    }
+  },
+  {
+    "id": "ebHookAuth000001",
+    "name": "Webhook token (X-Internal-Token)",
+    "type": "httpHeaderAuth",
+    "data": {
+      "name": "X-Internal-Token",
+      "value": "__INTERNAL_TOKEN__"
     }
   },
   {

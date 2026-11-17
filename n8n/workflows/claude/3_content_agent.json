@@ -16,7 +16,14 @@
         "httpMethod": "POST",
         "path": "eb-content",
         "responseMode": "lastNode",
+        "authentication": "headerAuth",
         "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ebHookAuth000001",
+          "name": "Webhook token (X-Internal-Token)"
+        }
       },
       "webhookId": "dab373da-2e80-54f8-8763-58c92c1acf09"
     },

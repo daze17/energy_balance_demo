@@ -7,6 +7,7 @@ import httpx
 from . import db
 
 N8N = os.environ.get("N8N_WEBHOOK_BASE", "http://n8n:5678/webhook")
+TOKEN = os.environ.get("INTERNAL_TOKEN", "local-internal-token")  # n8n webhook-ийн header auth
 
 AGENTS = {
     "booking": {"path": "eb-booking", "name": "Захиалга баталгаажуулах агент", "minutes_saved": 10},
@@ -28,7 +29,7 @@ def call(agent: str, payload: dict, timeout: float = 120) -> dict:
     started = time.time()
     url = f"{N8N}/{AGENTS[agent]['path']}"
     try:
-        r = httpx.post(url, json=payload, timeout=timeout)
+        r = httpx.post(url, json=payload, timeout=timeout, headers={"X-Internal-Token": TOKEN})
         r.raise_for_status()
         out = r.json() if r.content else {}
         if isinstance(out, list):

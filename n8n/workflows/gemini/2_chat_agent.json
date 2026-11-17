@@ -16,7 +16,14 @@
         "httpMethod": "POST",
         "path": "eb-chat",
         "responseMode": "lastNode",
+        "authentication": "headerAuth",
         "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ebHookAuth000001",
+          "name": "Webhook token (X-Internal-Token)"
+        }
       },
       "webhookId": "abb879e7-fb51-59ad-b24c-7a02b4a4c230"
     },
@@ -141,7 +148,7 @@
       "parameters": {
         "toolDescription": "Харилцагчийн захиалга / үнэгүй зөвлөгөөний хүсэлтийг системд бүртгэнэ. Нэр болон и-мэйл эсвэл утас заавал хэрэгтэй. Захиалгын дугаар буцаана.",
         "method": "POST",
-        "url": "http://web:8000/api/internal/booking",
+        "url": "__WEB_INTERNAL_URL__/api/internal/booking",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
         "headerParameters": {

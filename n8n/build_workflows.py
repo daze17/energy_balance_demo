@@ -15,6 +15,7 @@ NS = uuid.UUID("6f1c5c1e-0e1b-4b7a-9a52-eb0000000000")
 PG = {"postgres": {"id": "ebPostgres000001", "name": "Energy Balance DB"}}
 SMTP = {"smtp": {"id": "ebSmtpMailpit001", "name": "Mailpit SMTP (Gmail-ийн орлуулагч)"}}
 ANTH = {"anthropicApi": {"id": "ebAnthropic00001", "name": "Anthropic (Claude)"}}
+HOOK_AUTH = {"httpHeaderAuth": {"id": "ebHookAuth000001", "name": "Webhook token (X-Internal-Token)"}}
 FROM = "Energy Balance <__MAIL_FROM__>"
 
 VOICE = """Чи «Энержи Баланс ХХК» (Energy Balance, energybalance.mn)-ийн нэрийн өмнөөс бичнэ — Улаанбаатарт байрладаг эрчим хүчний аудит, барилгын эрчим хүчний гэрчилгээжүүлэлт, ISO 50001 зөвлөх үйлчилгээ үзүүлдэг компани.
@@ -41,9 +42,10 @@ def node(wf, name, type_, version, pos, params, creds=None, **extra):
 
 
 def webhook(wf, path, pos=(0, 300), mode="lastNode"):
+    # Header auth: n8n гаднаас нээлттэй байсан ч зөвхөн X-Internal-Token-тэй (вэб сервер) дуудна
     return node(wf, "Webhook", "n8n-nodes-base.webhook", 2.1, list(pos),
-                {"httpMethod": "POST", "path": path, "responseMode": mode, "options": {}},
-                webhookId=nid(wf, "webhook-id"))
+                {"httpMethod": "POST", "path": path, "responseMode": mode, "authentication": "headerAuth", "options": {}},
+                HOOK_AUTH, webhookId=nid(wf, "webhook-id"))
 
 
 GEMINI = {"googlePalmApi": {"id": "ebGemini00000001", "name": "Google Gemini"}}
@@ -222,7 +224,7 @@ def wf_chat():
         }, PG),
         node(w, "create_booking", "n8n-nodes-base.httpRequestTool", 4.2, [760, 560], {
             "toolDescription": "Харилцагчийн захиалга / үнэгүй зөвлөгөөний хүсэлтийг системд бүртгэнэ. Нэр болон и-мэйл эсвэл утас заавал хэрэгтэй. Захиалгын дугаар буцаана.",
-            "method": "POST", "url": "http://web:8000/api/internal/booking",
+            "method": "POST", "url": "__WEB_INTERNAL_URL__/api/internal/booking",
             "sendHeaders": True, "specifyHeaders": "keypair",
             "headerParameters": {"parameters": [{"name": "X-Internal-Token", "value": "__INTERNAL_TOKEN__"}]},
             "sendBody": True, "contentType": "json", "specifyBody": "keypair",
