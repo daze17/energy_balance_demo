@@ -163,3 +163,4 @@ web/app/             main.py (нүүр + API), admin.py, agents.py, templates/, 
 n8n/                 build_workflows.py → workflows/*.json, credentials.json.tpl, init.sh
 ```
 # energy_balance_demo
+# energy_balance_demo
