@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+{% block title %}Ажилтан{% endblock %}
+{% block h1 %}Ажилтан{% endblock %}
+{% block body %}
+<div class="row" style="grid-template-columns:1.6fr 1fr">
+  <table>
+    <tr><th>Нэр</th><th>Албан тушаал</th><th>Холбоо барих</th><th>Захиалга</th><th></th></tr>
+    {% for s in rows %}
+    <tr style="{{ 'opacity:.5' if not s.active }}">
+      <td><b>{{ s.name }}</b></td><td>{{ s.role }}</td>
+      <td><small>{{ s.email or '' }}<br>{{ s.phone or '' }}</small></td><td>{{ s.jobs }}</td>
+      <td style="white-space:nowrap"><a class="btn sm ghost" href="/admin/staff?edit={{ s.id }}">Засах</a>
+        {% if s.active %}<form method="post" action="/admin/staff/{{ s.id }}/delete" style="display:inline"><button class="btn sm danger">Идэвхгүй</button></form>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <form method="post" action="/admin/staff" class="card">
+    <h3>{{ 'Засах: ' ~ item.name if item else 'Шинэ ажилтан' }}</h3>
+    <input type="hidden" name="id" value="{{ item.id if item else '' }}">
+    <div class="field"><label>Нэр</label><input name="name" required value="{{ item.name if item else '' }}"></div>
+    <div class="field"><label>Албан тушаал</label><input name="role" required value="{{ item.role if item else '' }}"></div>
+    <div class="field"><label>И-мэйл</label><input name="email" type="email" value="{{ item.email or '' if item else '' }}"></div>
+    <div class="field"><label>Утас</label><input name="phone" value="{{ item.phone or '' if item else '' }}"></div>
+    {% if item %}<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="active" value="1" style="width:auto" {{ 'checked' if item.active }}> Идэвхтэй</label>{% endif %}
+    <p><button class="btn">Хадгалах</button> {% if item %}<a class="btn ghost" href="/admin/staff">Болих</a>{% endif %}</p>
+  </form>
+</div>
+{% endblock %}

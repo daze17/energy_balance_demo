@@ -1,0 +1,46 @@
+{% extends "admin/base.html" %}
+{% block title %}Эрчим хүчний тайлан{% endblock %}
+{% block h1 %}Эрчим хүчний шинжилгээний тайлан{% endblock %}
+{% block body %}
+<div class="row" style="grid-template-columns:340px 1fr">
+  <div class="card" style="padding:8px;max-height:75vh;overflow-y:auto">
+    {% for r in rows %}
+    <a href="/admin/energy?r={{ r.id }}" style="display:flex;gap:10px;align-items:center;padding:10px;border-radius:8px;text-decoration:none;color:var(--ink);{{ 'background:var(--mint)' if sel and r.id==sel.id }}">
+      <span class="g-{{ r.metrics.grade }}" style="width:32px;height:32px;border-radius:6px;color:#fff;display:grid;place-items:center;font-weight:600;flex:none">{{ r.metrics.grade }}</span>
+      <span><b style="font-weight:600">#{{ r.id }} {{ r.company or r.client_name }}</b><br>
+      <small class="muted">{{ r.building_type }} · {{ r.area_m2|int }} м² · {{ r.created_at.strftime('%m/%d %H:%M') }}</small></span>
+    </a>
+    {% else %}<p class="muted" style="padding:10px">Тайлан алга. Нүүр хуудасны «Эрчим хүчний тооцоо» хэсгээр үүсгэнэ.</p>{% endfor %}
+  </div>
+  {% if sel %}{% set m = sel.metrics %}
+  <div class="card">
+    <div class="eyebrow">Тайлан №{{ sel.id }} · {{ sel.created_at.strftime('%Y-%m-%d') }}</div>
+    <h3 style="font-size:1.4rem;margin-top:6px">{{ sel.company or sel.client_name }}</h3>
+    <p class="muted">{{ sel.client_name }} · {{ sel.building_type }} · {{ sel.area_m2 }} м² · {{ sel.email or 'и-мэйлгүй' }}</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;margin-bottom:16px">
+      <div>
+        {% for g in ['A','B','C','D','E','F','G'] %}
+        <div class="g-{{ g }}" style="color:#fff;font-size:.75rem;font-weight:600;padding:2px 8px;margin-bottom:4px;border-radius:3px;width:{{ 40 + loop.index0*9 }}%;display:flex;justify-content:space-between;{{ 'outline:2px solid var(--ink);outline-offset:1px' if g==m.grade }}">
+          <span>{{ g }}</span>{% if g==m.grade %}<span>◀ {{ m.eui_kwh_m2 }}</span>{% endif %}</div>
+        {% endfor %}
+        <small class="muted">кВт·ц/м²·жил · {{ m.grade_text }}</small>
+      </div>
+      <div class="kpis" style="grid-template-columns:1fr 1fr;margin:0">
+        <div class="kpi hl"><b>{{ m.eui_kwh_m2 }}</b><span>кВт·ц/м²·жил</span></div>
+        <div class="kpi"><b>{{ m.co2_t }} т</b><span>CO₂/жил</span></div>
+        <div class="kpi"><b>{{ m.total_cost|money }}</b><span>Зардал/жил</span></div>
+        <div class="kpi"><b>{{ m.saving_cost_mid|money }}</b><span>Боломжит хэмнэлт/жил</span></div>
+      </div>
+    </div>
+    <table style="margin-bottom:16px">
+      <tr><th>Хэсэг</th><th>Жилийн хэрэглээ</th><th>кВт·ц</th><th>Зардал</th></tr>
+      <tr><td>Цахилгаан</td><td>{{ sel.elec_kwh_year|int }} кВт·ц</td><td>{{ m.elec_kwh|int }}</td><td>{{ m.elec_cost|money }}</td></tr>
+      <tr><td>Дулаан</td><td>{{ sel.heat_gcal_year }} Гкал</td><td>{{ m.heat_kwh|int }}</td><td>{{ m.heat_cost|money }}</td></tr>
+      <tr><td><b>Нийт</b></td><td></td><td><b>{{ m.total_kwh|int }}</b></td><td><b>{{ m.total_cost|money }}</b></td></tr>
+    </table>
+    <h3>AI зөвлөмж</h3>
+    <div>{{ sel.recommendations|md|safe }}</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

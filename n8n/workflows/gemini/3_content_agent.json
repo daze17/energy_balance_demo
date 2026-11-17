@@ -1,0 +1,214 @@
+{
+  "id": "ebAgent3Content0",
+  "name": "Агент 3 · Контент (Facebook)",
+  "active": true,
+  "nodes": [
+    {
+      "id": "d6ac2821-d0cd-5169-bc6a-a249164a078b",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -145
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "eb-content",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "dab373da-2e80-54f8-8763-58c92c1acf09"
+    },
+    {
+      "id": "8bfa04b9-7da3-57af-8ef3-c92a727881f8",
+      "name": "Даваа/Лхагва/Баасан 09:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        45
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1,3,5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ee4eaa23-b58f-5f4c-9503-e13f5d0ffe07",
+      "name": "Сэдэв сонгох",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        210,
+        -50
+      ],
+      "parameters": {
+        "jsCode": "\nconst TOPICS = [\n  'Өвлийн улиралд барилгын дулаан алдагдал (цонх, хаалга, дээвэр)',\n  'Барилгын эрчим хүчний гэрчилгээ ба банкны ногоон зээл',\n  'ISO 50001 эрчим хүчний менежментийн тогтолцоо 6 сард',\n  'Үйлдвэрийн уурын зуух, шахуургын үр ашиг',\n  'LED гэрэлтүүлэг ба хөдөлгөөн мэдрэгчээр гэрэлтүүлгийн зардлыг бууруулах',\n  'Тепловизор хэмжилт: дулаан алдагдлыг нүдээр харах',\n  'Эрчим хүчний аудитын 5 үе шат',\n  'Хөрөнгө оруулалт 18–36 сард нөхөгдөх хэмнэлтийн арга хэмжээ',\n  'Оффисын агааржуулалт, халаалтын автомат удирдлага',\n  'Эрчим хүч хэмнэлтийн тухай хууль: томоохон хэрэглэгчийн үүрэг',\n];\nconst body = $input.first().json.body || {};\nconst topic = (body.topic || '').trim() || TOPICS[Math.floor(Math.random() * TOPICS.length)];\nreturn [{ json: { topic, trigger: body.topic !== undefined ? 'admin' : 'schedule' } }];\n"
+      }
+    },
+    {
+      "id": "db212fe7-7aed-5473-9987-27ceb1fff528",
+      "name": "AI: пост бичих",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        420,
+        -50
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Сэдэв: {{ $json.topic }}\nЭнэ сэдвээр Energy Balance-ийн Facebook пост бэлд.",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessagePromptTemplate",
+              "message": "Чи «Энержи Баланс ХХК» (Energy Balance, energybalance.mn)-ийн нэрийн өмнөөс бичнэ — Улаанбаатарт байрладаг эрчим хүчний аудит, барилгын эрчим хүчний гэрчилгээжүүлэлт, ISO 50001 зөвлөх үйлчилгээ үзүүлдэг компани.\nУриа: «Эрчим хүчний зохистой хэрэглээ — Бизнесийн амжилт.»\nБрэндийн дуу хоолой (Brand Book V1): санаа тавьдаг инженер шиг ярина — тайван, нарийн, тустай. Айдас төрүүлэхгүй, хэт сурталчлахгүй.\n- Тодорхой: богино өгүүлбэр, нэг санаа. Мэргэжлийн үгийг тайлбаргүй хэрэглэхгүй.\n- Нотолгоотой: тоо, хэмжилтэд тулгуурла. Таамаг тоо зохиохгүй; нарийн тоог аудитаар тодорхойлно гэж хэл.\n- Бүтээлч: алдагдлыг нэрлээд, шийдэл ба нөхөх хугацааг хэл.\n- Анхаарлын тэмдэг (!) болон эможи хэрэглэхгүй. «энерги» биш «эрчим хүч», «эко» биш «байгальд ээлтэй», «асар их хэмнэлт» биш «10–30% хэмнэлт» гэж бич.\nКомпанийн баримт: эхний жилд эрчим хүчний зардал 10–30% буурдаг; хөрөнгө оруулалт дунджаар 18–36 сард нөхөгддөг; хүлэмжийн хийн ялгарал 10–30% буурдаг; Эрчим Хүчний Зохицуулах Хорооны үнэлгээ 92.3% (2025); үйлчлүүлэгчийн сэтгэл ханамж 9.5/10. Үнэгүй 30 минутын анхан шатны зөвлөгөө өгдөг.\nХолбоо барих: +976 8811 3855 · energybalance.mgl@gmail.com · ХУД 8-р хороо, Нүхт 247 · energybalance.mn\n\nДаалгавар: Facebook Page-д зориулсан нэг пост ба карусель слайдын зургийн prompt бэлдэнэ.\nBrand Book-ийн сошиал дүрэм: нэг постонд нэг тоо эсвэл нэг санаа; бодит, хэмжигдэхүйц; бараан ба цайвар слайдыг ээлжлүүлнэ; лого зүүн дээд буланд.\nCaption шаардлага: 60–120 үг, Монгол хэлээр. Эхний мөр — асуулт эсвэл нэг тоо. Дунд нь 2–4 богино догол мөр. Төгсгөлд «Үнэгүй 30 минутын зөвлөгөө: 8811 3855» гэх мэт уриалга. Сүүлийн мөрөнд 3 hashtag: #EnergyBalance болон сэдэвт тохирох 2. Эможи, анхаарлын тэмдэг хэрэглэхгүй.\nСлайд: 3 эсвэл 4 ширхэг. prompt-ыг АНГЛИ хэлээр, зураг үүсгэх AI-д зориулж бич: flat vector illustration, calm, lots of white space, palette deep green #1F5E3B, green #3A8F5C, lime #8DC149, light grey #F4F7F4; бодит объект (барилга, хэмжилтийн багаж, цонх, үйлдвэр, нарны панел); утаа, неон, stock-photo хэв маяг хориглоно; слайд дээр гарах монгол гарчгийг prompt дотор \"Headline text: '...'\" гэж оруул.\nЗӨВХӨН дараах JSON-г буцаа, өөр текст бүү нэм:\n{\"caption\": \"...\", \"slides\": [{\"slide_number\": 1, \"prompt\": \"...\"}]}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ba175797-fa81-5fa1-a6c7-98fa24add517",
+      "name": "Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        490,
+        170
+      ],
+      "parameters": {
+        "modelName": "models/__GEMINI_MODEL__",
+        "options": {
+          "maxOutputTokens": 7800,
+          "temperature": 0.4
+        }
+      },
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ebGemini00000001",
+          "name": "Google Gemini"
+        }
+      }
+    },
+    {
+      "id": "9bd319e6-d930-5990-8998-13bccb1be4e8",
+      "name": "JSON задлах",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        750,
+        -50
+      ],
+      "parameters": {
+        "jsCode": "\nconst raw = $input.first().json.text || '';\nconst m = raw.match(/\\{[\\s\\S]*\\}/);\nif (!m) throw new Error('AI JSON буцаасангүй: ' + raw.slice(0, 200));\nconst data = JSON.parse(m[0]);\nconst slides = (data.slides || []).map((s, i) => ({ slide_number: s.slide_number || i + 1, prompt: String(s.prompt || '') }));\nreturn [{ json: { topic: $('Сэдэв сонгох').first().json.topic, caption: String(data.caption || '').trim(), slides } }];\n"
+      }
+    },
+    {
+      "id": "29d715b9-3343-5b37-ad08-cac078f4b2d1",
+      "name": "Пост хадгалах (Хүлээгдэж буй)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        960,
+        -50
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO posts (topic, caption, slides, status, source) VALUES ($1, $2, $3::jsonb, 'Хүлээгдэж буй', 'ai') RETURNING id, topic, caption, slides, status",
+        "options": {
+          "queryReplacement": "={{ [ $json.topic ] }},{{ [ $json.caption ] }},{{ [ JSON.stringify($json.slides) ] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "ebPostgres000001",
+          "name": "Energy Balance DB"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Сэдэв сонгох",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сэдэв сонгох": {
+      "main": [
+        [
+          {
+            "node": "AI: пост бичих",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: пост бичих": {
+      "main": [
+        [
+          {
+            "node": "JSON задлах",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON задлах": {
+      "main": [
+        [
+          {
+            "node": "Пост хадгалах (Хүлээгдэж буй)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Даваа/Лхагва/Баасан 09:00": {
+      "main": [
+        [
+          {
+            "node": "Сэдэв сонгох",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI: пост бичих",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

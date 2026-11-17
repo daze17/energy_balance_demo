@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Energy Balance — Эрчим хүчний аудит, зөвлөгөө</title>
+<link rel="icon" href="/brand/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Average+Sans&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/brand.css">
+<style>
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
+  header.top { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 70px; }
+  .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .logo img { width: 40px; height: 40px; }
+  .logo .wordmark { font-size: .95rem; }
+  nav a { margin-left: 24px; color: var(--ink); text-decoration: none; font-weight: 500; font-size: .9rem; }
+  nav a:hover, nav a.on { color: var(--green-2); }
+  @media (max-width: 960px) { nav { display: none; } }
+
+  .hero { background: var(--mint-2); padding: 64px 0 64px; overflow: hidden; }
+  .hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
+  .hero h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 600; letter-spacing: -.02em; }
+  .hero h1 span { color: var(--green-2); }
+  .checks { list-style: none; padding: 0; margin: 18px 0 22px; }
+  .checks li { padding-left: 28px; position: relative; margin: 7px 0; color: var(--ink); }
+  .checks li::before { content: ""; position: absolute; left: 2px; top: 6px; width: 12px; height: 7px; border-left: 2px solid var(--green-2);
+    border-bottom: 2px solid var(--green-2); transform: rotate(-45deg); }
+  .kpis { display: flex; gap: 14px; margin-bottom: 26px; flex-wrap: wrap; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; max-width: 240px; }
+  .kpi b { font-size: 1.6rem; font-weight: 600; color: var(--green); }
+  .kpi small { display: block; color: var(--muted); font-size: .78rem; }
+  .hero-art { border-radius: 20px; overflow: hidden; aspect-ratio: 4/3.2; background: #DFE6E0; position: relative; }
+  .hero-art .tag { position: absolute; left: 16px; bottom: 16px; background: #fff; border-radius: 6px; padding: 6px 12px; }
+  @media (max-width: 900px) { .hero .wrap { grid-template-columns: 1fr; } }
+
+  .values { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .values span { border: 1px solid var(--green); border-radius: 999px; padding: 6px 14px; font-size: .85rem; color: var(--green); }
+  .values span.d { background: var(--green); color: #fff; } .values span.l { background: var(--lime); border-color: var(--lime); }
+
+  section { padding: 76px 0; }
+  .sec-head { display: grid; grid-template-columns: 120px 1fr; gap: 24px; margin-bottom: 30px; align-items: start; }
+  .sec-head .num { font-size: 4rem; font-weight: 500; color: var(--green); line-height: .9; letter-spacing: -.04em; }
+  .sec-head h2 { font-size: 1.9rem; margin-bottom: .3em; }
+  @media (max-width: 700px) { .sec-head { grid-template-columns: 1fr; gap: 6px; } .sec-head .num { font-size: 2.6rem; } }
+
+  .results { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .results .r { background: var(--mint-2); border-radius: 14px; padding: 22px; }
+  .results .r b { font-size: 2.1rem; font-weight: 500; color: var(--green); display: block; letter-spacing: -.02em; }
+  .results .r span { color: var(--green-2); font-size: .88rem; }
+  .results .r.d { background: var(--green); } .results .r.d b { color: #fff; } .results .r.d span { color: var(--lime); }
+  @media (max-width: 900px) { .results { grid-template-columns: 1fr 1fr; } }
+
+  .svc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .svc .card { transition: .2s; display: flex; flex-direction: column; border: 0; background: var(--mint-2); }
+  .svc .card:hover { background: #fff; box-shadow: var(--shadow); outline: 1px solid var(--line); }
+  .svc .ic { width: 46px; height: 46px; border-radius: 50%; background: var(--green); display: grid; place-items: center; margin-bottom: 14px; }
+  .svc .ic svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .svc h3 { font-size: 1.1rem; }
+  .svc .price { margin-top: auto; padding-top: 14px; font-weight: 600; color: var(--green); }
+  @media (max-width: 900px) { .svc { grid-template-columns: 1fr; } }
+
+  .contrib { background: var(--green); color: #fff; border-radius: 20px; padding: 44px; display: grid; grid-template-columns: 1fr 2fr; gap: 30px; position: relative; overflow: hidden; }
+  .contrib::after { content: ""; position: absolute; right: -120px; bottom: -160px; width: 360px; height: 360px; border-radius: 50%; background: var(--green-2);
+    box-shadow: inset 0 0 0 70px var(--green-2), inset 0 0 0 200px var(--lime); opacity: .9; }
+  .contrib h2 { color: #fff; }
+  .contrib ol { columns: 2; margin: 0; padding-left: 1.2em; position: relative; z-index: 1; }
+  .contrib li { margin: 0 0 10px; break-inside: avoid; color: #DCEBE0; }
+  .contrib li::marker { color: var(--lime); }
+  @media (max-width: 900px) { .contrib { grid-template-columns: 1fr; } .contrib ol { columns: 1; } .contrib::after { display: none; } }
+
+  .proj { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .proj .card .eyebrow { display: block; margin-bottom: 6px; }
+  @media (max-width: 900px) { .proj { grid-template-columns: 1fr 1fr; } }
+
+  .calc { display: grid; grid-template-columns: 1fr 1.1fr; gap: 28px; align-items: start; }
+  @media (max-width: 900px) { .calc { grid-template-columns: 1fr; } }
+  .result-box { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 22px; min-height: 280px; }
+  .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .metric-grid div { background: var(--mint-2); border-radius: 10px; padding: 10px 12px; }
+  .metric-grid div.d { background: var(--green); } .metric-grid div.d b { color: #fff; } .metric-grid div.d small { color: var(--lime); }
+  .metric-grid b { display: block; font-size: 1.2rem; font-weight: 600; color: var(--green); }
+  .metric-grid small { color: var(--green-2); font-size: .74rem; }
+  .ladder { display: grid; gap: 4px; margin: 6px 0 16px; }
+  .ladder div { color: #fff; font-size: .72rem; font-weight: 600; padding: 2px 8px; border-radius: 3px; display: flex; justify-content: space-between; }
+  .ladder div.on { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+  .book { display: grid; grid-template-columns: 1fr 1.3fr; gap: 28px; }
+  @media (max-width: 900px) { .book { grid-template-columns: 1fr; } }
+  .ok-box { background: var(--mint); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; color: var(--green); }
+
+  footer { border-top: 1px solid var(--line); padding: 28px 0; font-size: .85rem; }
+  footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="/"><img src="/brand/logo.svg" alt=""><span class="wordmark">Energy Balance</span></a>
+    <nav>
+      <a href="#" class="on">Нүүр хуудас</a>
+      <a href="#results">Бидний тухай</a>
+      <a href="#services">Үйлчилгээ</a>
+      <a href="#projects">Хэрэгжүүлсэн төслүүд</a>
+      <a href="#calc">Эрчим хүчний тооцоо</a>
+      <a href="#book">Холбоо барих</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Энержи Баланс ХХК · {{ COMPANY.slogan }}</div>
+      <h1 style="margin-top:14px">Эрчим хүчний алдагдлыг тодорхойлж <span>зардлыг бууруулна.</span></h1>
+      <ul class="checks">
+        <li>Үнэгүй 30 минутын анхан шатны зөвлөгөө</li>
+        <li>Эрчим хүчний аудит</li>
+        <li>Барилгын эрчим хүчний гэрчилгээ</li>
+        <li>Үр ашгийн тооцоо</li>
+        <li>Аудитын дүгнэлт зөвлөмж бүхий тайлан</li>
+        <li>Эрчим хүчний үр ашгийг дээшлүүлэх төлөвлөгөө</li>
+      </ul>
+      <div class="kpis">
+        <div class="kpi"><b>92.3%</b> <span class="muted">(2025 он)</span><small>Манай үйл ажиллагаанд Эрчим Хүчний Зохицуулах Хорооноос өгсөн үнэлгээ</small></div>
+        <div class="kpi"><b>9.5/10</b><small>Үйлчлүүлэгчийн сэтгэл ханамжийн үнэлгээ</small></div>
+      </div>
+      <a class="btn" href="#book">Үнэгүй зөвлөгөө авах</a>
+      <a class="btn ghost" href="#" data-eb-chat>AI зөвлөхөөс асуух</a>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <!-- Brand Book 05: хавтгай, тайван өнгөтэй зохиомж -->
+      <svg viewBox="0 0 400 320" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+        <rect width="400" height="320" fill="#DFE6E0"/>
+        <circle cx="318" cy="92" r="52" fill="#8DC149"/>
+        <path d="M0 230 C90 205 200 200 400 222 V320 H0 Z" fill="#3A8F5C"/>
+        <g fill="#1F5E3B">
+          <path d="M28 160 H128 L104 224 H4 Z"/><rect x="62" y="224" width="7" height="34"/>
+          <path d="M160 168 H262 L238 232 H136 Z"/><rect x="196" y="232" width="7" height="30"/>
+        </g>
+        <g stroke="#FFFFFF" stroke-width="3">
+          <path d="M60 160 L36 224 M94 160 L70 224 M16 192 H116"/>
+          <path d="M194 168 L170 232 M228 168 L204 232 M148 200 H250"/>
+        </g>
+        <g stroke="#FFFFFF" stroke-width="3" fill="#FFFFFF" opacity=".95">
+          <line x1="330" y1="236" x2="330" y2="128"/><circle cx="330" cy="128" r="4"/>
+          <path d="M330 128 L326 86 L334 86 Z"/><path d="M330 128 L366 146 L362 153 Z"/><path d="M330 128 L294 146 L298 153 Z"/>
+        </g>
+      </svg>
+      <span class="tag eyebrow">Сэргээгдэх эрчим хүч</span>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="num">01</div>
+      <div>
+        <h2>Хэмжигдэхүйц үр дүн</h2>
+        <p class="muted" style="margin:0 0 14px">Бид хэмнэлт болон ялгарлын бууралтыг тоон үзүүлэлтээр илэрхийлдэг учраас оролцогч талууд үр дүнг бодит байдлаар харна.</p>
+        <div class="values"><span class="d">Хэмжигдэхүйц</span><span>Найдвартай</span><span>Үр ашигтай</span><span class="l">Тогтвортой</span><span>Тэнцвэртэй</span></div>
+      </div>
+    </div>
+    <div class="results">
+      <div class="r d"><b>10–30%</b><span>Эхний жилийн эрчим хүчний зардлын бууралт</span></div>
+      <div class="r"><b>18–36 сар</b><span>Хөрөнгө оруулалтын дундаж эргэн төлөлтийн хугацаа</span></div>
+      <div class="r"><b>10–30%</b><span>Хүлэмжийн хийн ялгарлын бууралт</span></div>
+      <div class="r"><b>ISO 50001</b><span>Бэлэн процесс ба загварууд</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="services" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="num">02</div>
+      <div><h2>Үйлчилгээ</h2><p class="muted" style="margin:0">Үйлчилгээ, үнийн мэдээлэл өгөгдлийн сангаас шууд уншигдана — админ самбараас засна.</p></div>
+    </div>
+    {% set icons = {
+      'chat': '<path d="M4 5h16v11H8l-4 4z"/>',
+      'factory': '<path d="M3 20V10l6 4V10l6 4V5h6v15z"/><path d="M7 17h2M12 17h2M17 17h2"/>',
+      'building': '<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/>',
+      'certificate': '<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M7 8h10M7 12h6"/><circle cx="16" cy="17" r="2.5"/><path d="M15 19.5V22l1-.7 1 .7v-2.5"/>',
+      'iso': '<path d="M20 11a8 8 0 0 0-14.5-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.5 4.5L20 16"/><path d="M20 20v-4h-4"/>',
+      'training': '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+    } %}
+    <div class="svc">
+      {% for s in services %}
+      <div class="card">
+        <div class="ic"><svg viewBox="0 0 24 24">{{ icons.get(s.icon, icons['training'])|safe }}</svg></div>
+        <h3>{{ s.name }}</h3>
+        <p class="muted" style="margin:0">{{ s.description }}</p>
+        <div class="price">{% if s.price_from %}{{ s.price_from|money }}-с эхэлнэ{% else %}{{ s.price_from|money }}{% endif %}
+          {% if s.duration %}<span class="muted" style="font-weight:400"> · {{ s.duration }}</span>{% endif %}</div>
+        <a href="#" data-eb-chat="{{ s.name }}-ийн талаар дэлгэрэнгүй мэдмээр байна." style="font-size:.85rem;margin-top:8px">AI зөвлөхөөс асуух →</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="contrib">
+      <div style="position:relative;z-index:1"><div class="eyebrow" style="color:var(--lime)">03</div><h2 style="font-size:1.8rem;margin-top:8px">Таны бизнест оруулах хувь нэмэр</h2>
+        <p style="color:#C9DECF">Суурь нөхцөлөөс эхлээд ажлын төлөвлөгөө хүртэл бүх шатыг хамарна.</p></div>
+      <ol>
+        <li>Эрчим хүчний суурь нөхцөл байдлыг тодорхойлох</li>
+        <li>Урьдчилсан эрчим хүчний статистик мэдээлэл боловсруулах</li>
+        <li>Хэмжилт, тооцоо хийх</li>
+        <li>Өнөөгийн нөхцөл байдалд дүн шинжилгээ хийж дүгнэлт гаргах</li>
+        <li>Эрчим хүчний үр ашгийг сайжруулах арга хэмжээг санал болгох</li>
+        <li>Нарийвчилсан аудитын чиглэлийг тодорхойлох</li>
+        <li>Хөрөнгө оруулалт, эдийн засгийн үр ашгийг тодорхойлох</li>
+        <li>Аудитын тайланг боловсруулж хүргэх</li>
+        <li>Үр ашгийг сайжруулах ажлын төлөвлөгөө боловсруулах</li>
+        <li>Эрчим хүч, CO₂ хэмнэлтийг тодорхойлох</li>
+        <li>Сургалт зохион байгуулах</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="projects" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head"><div class="num">04</div><div><h2>Хэрэгжүүлсэн төслүүд</h2></div></div>
+    <div class="proj">
+      {% for p in projects %}
+      <div class="card"><span class="eyebrow">{{ p.client_type }} · {{ p.year }}</span><h3 style="font-size:1.02rem">{{ p.title }}</h3>
+        <p class="muted" style="margin:0;font-size:.9rem">{{ p.result }}</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section id="calc" style="background:var(--mint-2)">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="num">05</div>
+      <div><span class="badge b-ok">AI агент №4</span>
+        <h2 style="margin-top:10px">Барилгынхаа эрчим хүчний балансыг 1 минутад тооцоол</h2>
+        <p class="muted" style="margin:0">Жилийн цахилгаан, дулааны хэрэглээгээ оруулахад AI шинжээч эрчим хүчний эрчимжилт (кВт·ц/м²), CO₂ ялгарал, A–G зэрэглэлийг тооцож, хэмнэлтийн зөвлөмж бэлдэн и-мэйлээр илгээнэ.</p></div>
+    </div>
+    <div class="calc">
+      <form id="energy-form" class="card">
+        <div class="grid2">
+          <div class="field"><label>Нэр *</label><input name="client_name" required></div>
+          <div class="field"><label>И-мэйл</label><input name="email" type="email" placeholder="тайлан илгээх хаяг"></div>
+          <div class="field"><label>Байгууллага</label><input name="company"></div>
+          <div class="field"><label>Барилгын төрөл</label>
+            <select name="building_type"><option>Оффис</option><option>Сургууль</option><option>Цэцэрлэг</option><option>Эмнэлэг</option><option>Үйлдвэр</option><option>Худалдааны төв</option><option>Орон сууц</option><option>Зочид буудал</option></select></div>
+          <div class="field"><label>Талбай (м²) *</label><input name="area_m2" type="number" min="1" step="any" required value="2400"></div>
+          <div class="field"><label>Цахилгаан, жилд (кВт·ц) *</label><input name="elec_kwh_year" type="number" min="0" step="any" required value="310000"></div>
+          <div class="field"><label>Дулаан, жилд (Гкал)</label><input name="heat_gcal_year" type="number" min="0" step="any" value="620"></div>
+          <div class="field"><label>Жилийн цахилгааны төлбөр (₮)</label><input name="elec_cost_year" type="number" min="0" step="any" placeholder="мэдэхгүй бол хоосон"></div>
+        </div>
+        <button class="btn" type="submit" id="energy-btn">Шинжилгээ хийх</button>
+      </form>
+      <div class="result-box" id="energy-result">
+        <p class="muted">Үр дүн энд гарна. Жишээ утгууд бөглөгдсөн тул шууд «Шинжилгээ хийх» дарж үзэж болно.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="book">
+  <div class="wrap book">
+    <div>
+      <div class="sec-head" style="grid-template-columns:1fr;margin-bottom:10px"><div class="num">06</div></div>
+      <span class="badge b-ok">AI агент №1</span>
+      <h2 style="margin-top:10px;font-size:1.9rem">Үнэгүй зөвлөгөө, захиалга</h2>
+      <p class="muted">Захиалга шууд өгөгдлийн санд бүртгэгдэнэ. AI агент танд тохирсон баталгаажуулах и-мэйлийг 10 секундэд илгээнэ.</p>
+      <div class="card" style="margin-top:20px;background:var(--mint-2);border:0">
+        <div class="eyebrow">Холбоо барих</div>
+        <p style="margin:8px 0 0">{{ COMPANY.phone }}<br>{{ COMPANY.email }}<br>{{ COMPANY.address }}</p>
+      </div>
+    </div>
+    <form method="post" action="/book" class="card">
+      {% if booked %}
+      <div class="ok-box"><b>Захиалга #{{ booked }} бүртгэгдлээ.</b> Баталгаажуулах и-мэйл таны хаяг руу удахгүй очно.</div>
+      {% endif %}
+      <div class="grid2">
+        <div class="field"><label>Нэр *</label><input name="name" required></div>
+        <div class="field"><label>И-мэйл *</label><input name="email" type="email" required></div>
+        <div class="field"><label>Утас</label><input name="phone"></div>
+        <div class="field"><label>Байгууллага</label><input name="company"></div>
+        <div class="field"><label>Үйлчилгээ</label>
+          <select name="service_id">{% for s in services %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}</select></div>
+        <div class="field"><label>Барилгын төрөл</label>
+          <select name="building_type"><option>Оффис</option><option>Үйлдвэр</option><option>Сургууль</option><option>Цэцэрлэг</option><option>Эмнэлэг</option><option>Орон сууц</option><option>Хаус</option><option>Бусад</option></select></div>
+        <div class="field"><label>Уулзах өдөр</label><input name="preferred_date" type="date" min="{{ today }}"></div>
+      </div>
+      <div class="field"><label>Нэмэлт мэдээлэл</label><textarea name="message" rows="3" placeholder="Жишээ: Өвөл оффис хүйтэн, дулааны төлбөр өндөр байна."></textarea></div>
+      <button class="btn" type="submit">Илгээх</button>
+      <p class="muted" style="font-size:.8rem;margin:.6em 0 0">Илгээснээр та манай нууцлалын бодлогыг зөвшөөрч байна.</p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="wordmark" style="font-size:.8rem">energybalance.mn</span>
+    <span class="muted">© 2026 EnergyBalance. Бүх эрх хуулиар хамгаалагдсан. · <a href="/admin">Админ самбар</a></span>
+  </div>
+</footer>
+
+<script src="/static/js/site.js"></script>
+<!-- AI агент №2: зөвлөх чат виджет (аль ч сайтад энэ нэг мөрөөр суулгана) -->
+<script src="/static/js/chat-widget.js" defer></script>
+</body>
+</html>

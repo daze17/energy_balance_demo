@@ -1,0 +1,64 @@
+{% extends "admin/base.html" %}
+{% block title %}Хянах самбар{% endblock %}
+{% block h1 %}Хянах самбар{% endblock %}
+{% block body %}
+<div class="kpis">
+  <div class="kpi hl"><b>{{ saved_hours }} цаг</b><span>AI агентуудын хэмнэсэн цаг (тооцоо)</span></div>
+  <div class="kpi"><b>{{ k.bookings }}</b><span>Нийт захиалга · <b style="display:inline;font-size:1em;color:var(--green)">{{ k.new_bookings }} шинэ</b></span></div>
+  <div class="kpi"><b>{{ k.emails }}</b><span>AI-ийн бичсэн и-мэйл илгээгдсэн</span></div>
+  <div class="kpi"><b>{{ k.answers }}</b><span>Чат агентын хариулсан асуулт</span></div>
+  <div class="kpi"><b>{{ k.ai_posts }}</b><span>AI бэлдсэн пост</span></div>
+  <div class="kpi"><b>{{ k.reports }}</b><span>Эрчим хүчний тайлан</span></div>
+  <div class="kpi"><b>{{ k.ok_runs }}/{{ k.runs }}</b><span>Амжилттай агент ажиллалт</span></div>
+  <div class="kpi"><b>{{ k.avg_sec }} сек</b><span>Агентын дундаж хугацаа</span></div>
+</div>
+
+<div class="row">
+  <div class="card">
+    <h3>Захиалга — сүүлийн 14 хоног</h3>
+    <div style="display:flex;align-items:flex-end;gap:6px;height:160px;padding-top:10px">
+      {% for d in daily %}
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end" title="{{ d.day }}: {{ d.n }}">
+        <small class="muted">{{ d.n if d.n else '' }}</small>
+        <div style="width:100%;background:{{ 'var(--green)' if loop.last else 'var(--green-2)' }};border-radius:4px 4px 0 0;height:{{ (d.n / max_daily * 120)|round|int + 2 }}px"></div>
+        <small class="muted" style="font-size:.65rem">{{ d.day.strftime('%m/%d') }}</small>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card">
+    <h3>Үйлчилгээгээр</h3>
+    {% for s in by_service %}
+    <div style="margin:8px 0">
+      <div style="display:flex;justify-content:space-between;font-size:.88rem"><span>{{ s.name }}</span><b>{{ s.n }}</b></div>
+      <div style="background:var(--base);border-radius:6px;height:8px"><div style="background:var(--green-2);height:8px;border-radius:6px;width:{{ (s.n / max_service * 100)|round }}%"></div></div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="row">
+  <div class="card">
+    <h3>AI агентууд</h3>
+    <table>
+      <tr><th>Агент</th><th>Ажилласан</th><th>Дундаж</th><th>Хэмнэлт/удаа</th></tr>
+      {% for key, m in agent_meta.items() %}{% set a = per_agent.get(key) %}
+      <tr><td>{{ m.name }}</td><td>{{ a.ok if a else 0 }}{% if a and a.n != a.ok %} <span class="badge b-no">{{ a.n - a.ok }} алдаа</span>{% endif %}</td>
+        <td>{{ a.avg_sec if a and a.avg_sec else '—' }} сек</td><td>~{{ m.minutes_saved }} мин</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="card">
+    <h3>Сүүлийн ажиллалтууд</h3>
+    <table>
+      <tr><th>Хэзээ</th><th>Агент</th><th>Төлөв</th><th>Хугацаа</th></tr>
+      {% for r in runs %}
+      <tr><td>{{ r.started_at.strftime('%m/%d %H:%M') }}</td><td>{{ agent_meta[r.agent].name if r.agent in agent_meta else r.agent }}</td>
+        <td>{% if r.status=='success' %}<span class="badge b-ok">амжилттай</span>{% else %}<span class="badge b-no" title="{{ r.error }}">алдаа</span>{% endif %}</td>
+        <td>{{ (r.duration_ms/1000)|round(1) if r.duration_ms else '—' }} сек</td></tr>
+      {% else %}<tr><td colspan="4" class="muted">Одоогоор ажиллалт алга. Нүүр хуудаснаас захиалга өгч, чатаар асууж үзээрэй.</td></tr>{% endfor %}
+    </table>
+  </div>
+</div>
+<p class="muted" style="font-size:.8rem">«Хэмнэсэн цаг» = амжилттай ажиллалт × гараар хийхэд зарцуулах дундаж хугацаа (захиалга 10 мин, чат 5 мин, пост 45 мин, тайлан 60 мин).</p>
+{% endblock %}

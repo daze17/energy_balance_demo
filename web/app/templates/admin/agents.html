@@ -1,0 +1,42 @@
+{% extends "admin/base.html" %}
+{% block title %}Агентууд{% endblock %}
+{% block h1 %}AI агентууд{% endblock %}
+{% block body %}
+{% set desc = {
+  'booking': ('Нүүр хуудасны захиалга → өгөгдлийн сан → AI хүн бүрт тохирсон баталгаажуулах и-мэйл бичнэ → SMTP илгээнэ → төлөвийг «Илгээсэн» болгоно.', 'Workflow + AI'),
+  'chat': ('Вэб чат → AI Agent өөрөө хэрэгсэл сонгоно: үйлчилгээ, үнэ (DB), түгээмэл асуулт (DB), захиалга бүртгэх (API), менежерт шилжүүлэх (и-мэйл). Яриаг Postgres санах ойд хадгална.', 'AI Agent + 4 хэрэгсэл'),
+  'content': ('Товч эсвэл Даваа/Лхагва/Баасан 09:00 → AI Brand Book-ийн дуу хоолойгоор {caption, slides[]} JSON бэлдэнэ → «Хүлээгдэж буй» → хүн батална → Facebook.', 'Workflow + AI + хүний хяналт'),
+  'energy': ('Хэрэглээний өгөгдөл → Code node: кВт·ц/м², CO₂, A–G зэрэглэл, зардал → AI хэмнэлтийн зөвлөмж → тайлан DB-д → и-мэйлээр илгээнэ.', 'Тооцоо + AI'),
+} %}
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-bottom:18px">
+  {% for key, m in meta.items() %}{% set s = stats.get(key) %}
+  <div class="card" style="{{ 'background:var(--green);color:#fff;border-color:var(--green)' if loop.first }}">
+    <div class="eyebrow" style="{{ 'color:var(--lime)' if loop.first }}">Агент №{{ loop.index }} · {{ desc[key][1] }}</div>
+    <h3 style="margin:6px 0;{{ 'color:#fff' if loop.first }}">{{ m.name }}</h3>
+    <p style="font-size:.84rem;margin:0 0 10px;{{ 'color:#D3E5D8' if loop.first else 'color:var(--muted)' }}">{{ desc[key][0] }}</p>
+    <small>Webhook: <code>/webhook/{{ m.path }}</code><br>
+      {{ s.ok if s else 0 }}/{{ s.n if s else 0 }} амжилттай{% if s and s.last %} · сүүлд {{ s.last.strftime('%m/%d %H:%M') }}{% endif %}</small>
+  </div>
+  {% endfor %}
+</div>
+<p>
+  <a class="btn" href="http://localhost:47678" target="_blank">n8n workflow-ууд нээх ↗</a>
+  <a class="btn ghost" href="http://localhost:47825" target="_blank">И-мэйл хайрцаг (Mailpit) ↗</a>
+</p>
+<h3 style="margin-top:22px">Ажиллалтын бүртгэл (сүүлийн 50)</h3>
+<table>
+  <tr><th>Хэзээ</th><th>Агент</th><th>Төлөв</th><th>Хугацаа</th><th>Оролт / гаралт</th></tr>
+  {% for r in runs %}
+  <tr>
+    <td style="white-space:nowrap">{{ r.started_at.strftime('%m/%d %H:%M:%S') }}</td>
+    <td>{{ meta[r.agent].name if r.agent in meta else r.agent }}</td>
+    <td>{% if r.status=='success' %}<span class="badge b-ok">амжилттай</span>{% else %}<span class="badge b-no">алдаа</span>{% endif %}</td>
+    <td>{{ (r.duration_ms/1000)|round(1) if r.duration_ms else '—' }} сек</td>
+    <td><details><summary style="cursor:pointer;color:var(--green-2);font-size:.82rem">харах</summary>
+      <pre style="white-space:pre-wrap;font-size:.74rem;max-width:620px;background:var(--mint-2);padding:8px;border-radius:6px">ОРОЛТ: {{ r.input|tojson(indent=1) }}
+
+{% if r.error %}АЛДАА: {{ r.error }}{% else %}ГАРАЛТ: {{ r.output|tojson(indent=1) }}{% endif %}</pre></details></td>
+  </tr>
+  {% else %}<tr><td colspan="5" class="muted">Ажиллалт алга.</td></tr>{% endfor %}
+</table>
+{% endblock %}

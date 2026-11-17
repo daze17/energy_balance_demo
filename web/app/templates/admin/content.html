@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+{% block title %}Контент{% endblock %}
+{% block h1 %}Контент агент{% endblock %}
+{% block body %}
+{% if error %}<div class="flash">Агент ажиллахад алдаа гарлаа. «Агентууд» цэснээс алдааг харна уу (ANTHROPIC_API_KEY тохируулсан эсэх).</div>{% endif %}
+<form method="post" action="/admin/content/generate" class="card" style="display:flex;gap:10px;align-items:end;margin-bottom:14px;flex-wrap:wrap"
+      onsubmit="const b=this.querySelector('button');b.disabled=true;b.innerHTML='<span class=spinner></span> AI бичиж байна…'">
+  <div style="flex:1;min-width:240px"><label>Сэдэв (хоосон бол AI өөрөө сонгоно)</label>
+    <input name="topic" placeholder="Жишээ: өвлийн дулаан алдагдал, ногоон зээл, ISO 50001, LED гэрэлтүүлэг"></div>
+  <button class="btn">Пост бэлдэх</button>
+</form>
+<p class="muted" style="margin:0 0 18px;font-size:.88rem">Агент Brand Book-ийн дуу хоолойгоор Facebook пост ба карусель слайд бүрийн зургийн prompt-ыг <code>{caption, slides[]}</code> JSON-оор бэлдэнэ. n8n дээр Даваа, Лхагва, Баасан 09:00-д автоматаар ажиллана. Хүн батлахаас өмнө нийтлэгдэхгүй.</p>
+
+{% set cls = {'Хүлээгдэж буй':'b-new','Нийтэлсэн':'b-ok','Татгалзсан':'b-no'} %}
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px">
+{% for p in rows %}
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:4px">
+      <b style="color:var(--green)">{{ p.topic or 'Пост' }}</b><span class="badge {{ cls.get(p.status,'b-grey') }}">{{ p.status }}</span>
+    </div>
+    <small class="muted">{{ p.created_at.strftime('%Y-%m-%d %H:%M') }} · {{ 'AI агент' if p.source=='ai' else 'гараар' }}</small>
+    <form method="post" action="/admin/posts/{{ p.id }}/status">
+      <textarea name="caption" rows="8" style="margin:10px 0;font-size:.88rem" {{ 'readonly' if p.status!='Хүлээгдэж буй' }}>{{ p.caption }}</textarea>
+      {% if p.slides %}
+      <details style="margin-bottom:10px"><summary style="cursor:pointer;color:var(--green-2);font-size:.85rem">Слайдын зургийн prompt ({{ p.slides|length }})</summary>
+        <ol style="font-size:.8rem;padding-left:1.2em">{% for s in p.slides %}<li>{{ s.prompt }}</li>{% endfor %}</ol></details>
+      {% endif %}
+      {% if p.status=='Хүлээгдэж буй' %}
+      <button class="btn sm" name="status" value="Нийтэлсэн">Батлах ба нийтлэх</button>
+      <button class="btn sm danger" name="status" value="Татгалзсан">Татгалзах</button>
+      {% endif %}
+    </form>
+  </div>
+{% endfor %}
+</div>
+{% endblock %}

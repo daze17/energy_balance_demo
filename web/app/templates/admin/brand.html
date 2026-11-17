@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+{% block title %}Brand Book{% endblock %}
+{% block h1 %}Brand Book V1{% endblock %}
+{% block body %}
+<div class="row" style="grid-template-columns:1fr 1.4fr">
+  <div class="card" style="background:var(--mint-2);border:0;display:grid;place-items:center;padding:30px">
+    <img src="/brand/logo-full.svg" alt="Energy Balance" style="width:min(300px,100%)">
+  </div>
+  <div class="card">
+    <div class="eyebrow">01 — Брэндийн танилцуулга</div>
+    <h3 style="font-size:1.4rem;margin-top:8px">Эрчим хүчний алдагдлыг хэмнэлт болгон хувиргах зөвлөх үйлчилгээ.</h3>
+    <p class="muted">Бизнес, байгууллагад зориулсан эрчим хүчний аудит, гэрчилгээжүүлэлт, ISO 50001 зөвлөгөө. Байгальд ээлтэй, хэмжигдэхүйц үр дүнтэй.</p>
+    <p><b>Уриа:</b> Эрчим хүчний зохистой хэрэглээ — Бизнесийн амжилт.</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="badge" style="background:var(--green);color:#fff">Хэмжигдэхүйц</span><span class="badge b-grey">Найдвартай</span>
+      <span class="badge b-grey">Үр ашигтай</span><span class="badge" style="background:var(--lime);color:var(--green)">Тогтвортой</span><span class="badge b-grey">Тэнцвэртэй</span>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px">
+  <div class="eyebrow">Өнгө</div>
+  <div style="display:grid;grid-template-columns:2fr 1.3fr 1.3fr 1fr 1fr;gap:12px;margin-top:12px">
+    {% for c in [('Үндсэн','#1F5E3B','RGB 31 94 59'),('Хоёрдогч','#3A8F5C','RGB 58 143 92'),('Онцлох','#8DC149','RGB 141 193 73'),('Саармаг','#F4F7F4',''),('Саармаг','#FFFFFF','')] %}
+    <div><div style="height:90px;border-radius:10px;background:{{ c[1] }};border:1px solid var(--line)"></div>
+      <div class="eyebrow" style="margin-top:6px">{{ c[0] }}</div><small>{{ c[1] }}<br><span class="muted">{{ c[2] }}</span></small></div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="row">
+  <div class="card">
+    <div class="eyebrow">Типографи</div>
+    <div style="display:flex;gap:24px;margin-top:12px">
+      <div><div style="font-size:3.4rem;color:var(--green);font-family:'Average Sans'">Aa</div><small class="muted">Латин — Average Sans</small></div>
+      <div><div style="font-size:3.4rem;color:var(--green)">Аа</div><small class="muted">Кирилл — Inter</small></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">07 — Дуу хоолой</div>
+    <h3 style="margin-top:8px">Санаа тавьдаг инженер шиг ярина.</h3>
+    <p class="muted" style="margin:0 0 8px">Тайван, нарийн, тустай. Айдас төрүүлэхгүй, хэт сурталчлахгүй.</p>
+    <table>
+      <tr><th>Ингэж бичнэ</th><th>Ингэж бичихгүй</th></tr>
+      <tr><td>Таны барилга жилд дулаанаа 18%-ийг цонх, хаалгаар алдаж байна.</td><td class="muted">Танай барилга маш их дулаан алдаж байна!!!</td></tr>
+      <tr><td>Хөрөнгө оруулалт 24 сарын дотор нөхөгдөнө.</td><td class="muted">Гайхалтай хэмнэлт таныг хүлээж байна.</td></tr>
+    </table>
+    <p class="muted" style="font-size:.8rem;margin-bottom:0">Энэ дүрмийг 4 AI агентын system prompt бүрд оруулсан.</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Самбар{% endblock %} · Energy Balance Admin</title>
+<link rel="icon" href="/brand/logo.svg">
+<link href="https://fonts.googleapis.com/css2?family=Average+Sans&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/brand.css">
+<style>
+  body { background: var(--mint-2); }
+  .layout { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
+  aside { background: var(--green); color: #D3E5D8; padding: 18px 14px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  aside .brand { display: flex; gap: 10px; align-items: center; color: #fff; padding: 4px 8px 18px; }
+  aside .brand img { width: 38px; height: 38px; border-radius: 50%; box-shadow: 0 0 0 2px #fff; }
+  aside .brand .wordmark { color: #fff; font-size: .78rem; letter-spacing: .22em; }
+  aside .brand small { display: block; color: var(--lime); font-size: .72rem; margin-top: 2px; }
+  aside a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #D3E5D8; text-decoration: none; font-weight: 500; font-size: .92rem; margin-bottom: 2px; }
+  aside a:hover { background: rgba(255,255,255,.07); color: #fff; }
+  aside a.on { background: var(--green-2); color: #fff; }
+  aside a svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  aside a .cnt { margin-left: auto; background: var(--lime); color: var(--green); border-radius: 999px; font-size: .72rem; padding: 0 7px; font-weight: 700; }
+  aside .sep { font-size: .68rem; text-transform: uppercase; letter-spacing: .14em; color: var(--lime); margin: 18px 12px 6px; }
+  main { padding: 26px 32px 60px; min-width: 0; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; gap: 12px; flex-wrap: wrap; }
+  .topbar h1 { font-size: 1.6rem; margin: 0; }
+  .topbar .who { color: var(--muted); font-size: .9rem; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: .9rem; }
+  th { background: var(--mint-2); color: var(--muted); font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
+  tr:last-child td { border-bottom: 0; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+  .kpi b { font-size: 1.9rem; font-weight: 500; display: block; color: var(--green); letter-spacing: -.02em; }
+  .kpi span { color: var(--green-2); font-size: .84rem; }
+  .kpi.hl { background: var(--green); color: #fff; border-color: var(--green); }
+  .kpi.hl b { color: #fff; }
+  .kpi.hl span { color: var(--lime); }
+  .card h3 { font-size: 1.05rem; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .tabs a { display: inline-block; padding: 6px 12px; border-radius: 999px; text-decoration: none; color: var(--muted); font-weight: 600; font-size: .88rem; margin-right: 4px; }
+  .tabs a.on { background: var(--green); color: #fff; }
+  .inline { display: inline-flex; gap: 6px; align-items: center; }
+  .inline select { width: auto; padding: .35em .5em; font-size: .85rem; }
+  .flash { padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; background: #FDECE8; color: var(--danger); }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; } aside { position: static; height: auto; }
+    .kpis, .row { grid-template-columns: 1fr 1fr; } main { padding: 18px 16px; }
+  }
+</style>
+{% block head %}{% endblock %}
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="brand"><img src="/brand/logo.svg" alt=""><div><span class="wordmark">Energy Balance</span><small>Admin Panel v1.0</small></div></div>
+    {% set ic = {
+      'dash': '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+      'cal': '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+      'svc': '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M12 8l-2 3h3l-2 3"/>',
+      'staff': '<circle cx="9" cy="8" r="3.5"/><path d="M2 20c.8-3.5 3.6-5.5 7-5.5s6.2 2 7 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .8 3.4 2.6 4 5.2"/>',
+      'pen': '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',
+      'fb': '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M15 8h-2a2 2 0 0 0-2 2v11M9 13h6"/>',
+      'chat': '<path d="M4 5h16v11H8l-4 4z"/>',
+      'energy': '<path d="M3 7l6 6 4-4 8 8"/><path d="M15 17h6v-6"/>',
+      'bot': '<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 14h.01M15 14h.01"/>',
+      'brand': '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18"/>',
+      'web': '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/>',
+      'out': '<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',
+    } %}
+    <a href="/admin" class="{{ 'on' if active=='dashboard' }}"><svg viewBox="0 0 24 24">{{ ic.dash|safe }}</svg>Хянах самбар</a>
+    <a href="/admin/bookings" class="{{ 'on' if active=='bookings' }}"><svg viewBox="0 0 24 24">{{ ic.cal|safe }}</svg>Захиалга {% if new_count %}<span class="cnt">{{ new_count }}</span>{% endif %}</a>
+    <a href="/admin/services" class="{{ 'on' if active=='services' }}"><svg viewBox="0 0 24 24">{{ ic.svc|safe }}</svg>Үйлчилгээ</a>
+    <a href="/admin/staff" class="{{ 'on' if active=='staff' }}"><svg viewBox="0 0 24 24">{{ ic.staff|safe }}</svg>Ажилтан</a>
+    <div class="sep">AI агентууд</div>
+    <a href="/admin/content" class="{{ 'on' if active=='content' }}"><svg viewBox="0 0 24 24">{{ ic.pen|safe }}</svg>Контент {% if pending_posts %}<span class="cnt">{{ pending_posts }}</span>{% endif %}</a>
+    <a href="/admin/facebook" class="{{ 'on' if active=='facebook' }}"><svg viewBox="0 0 24 24">{{ ic.fb|safe }}</svg>Facebook</a>
+    <a href="/admin/chat" class="{{ 'on' if active=='chat' }}"><svg viewBox="0 0 24 24">{{ ic.chat|safe }}</svg>Чат</a>
+    <a href="/admin/energy" class="{{ 'on' if active=='energy' }}"><svg viewBox="0 0 24 24">{{ ic.energy|safe }}</svg>Эрчим хүчний тайлан</a>
+    <a href="/admin/agents" class="{{ 'on' if active=='agents' }}"><svg viewBox="0 0 24 24">{{ ic.bot|safe }}</svg>Агентууд</a>
+    <div class="sep">Бусад</div>
+    <a href="/admin/brand" class="{{ 'on' if active=='brand' }}"><svg viewBox="0 0 24 24">{{ ic.brand|safe }}</svg>Brand Book</a>
+    <a href="/" target="_blank"><svg viewBox="0 0 24 24">{{ ic.web|safe }}</svg>Нүүр хуудас ↗</a>
+    <a href="/admin/logout"><svg viewBox="0 0 24 24">{{ ic.out|safe }}</svg>Гарах</a>
+  </aside>
+  <main>
+    <div class="topbar">
+      <h1>{% block h1 %}{% endblock %}</h1>
+      <div class="who">{{ user.name }} · {{ user.email }}</div>
+    </div>
+    {% block body %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>

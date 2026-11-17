@@ -1,0 +1,247 @@
+{
+  "id": "ebAgent4Energy00",
+  "name": "Агент 4 · Эрчим хүчний шинжилгээ",
+  "active": true,
+  "nodes": [
+    {
+      "id": "844a2fb3-1f9a-5350-ad67-b159f317aa9a",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -50
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "eb-energy",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "03de65cc-b8d7-5f97-b29d-da4698c9ab4c"
+    },
+    {
+      "id": "b1245153-be1e-5a97-b953-d95504ec2715",
+      "name": "Тооцоо",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        210,
+        -50
+      ],
+      "parameters": {
+        "jsCode": "\n// Урьдчилсан эрчим хүчний баланс (жишиг коэффициент — нарийн дүнг аудитаар тодорхойлно)\nconst b = $input.first().json.body;\nconst num = v => (v === null || v === undefined || v === '' ? null : Number(v));\nconst area = num(b.area_m2), elec = num(b.elec_kwh_year) || 0, gcal = num(b.heat_gcal_year) || 0;\nconst GCAL_KWH = 1163;           // 1 Гкал = 1163 кВт·ц\nconst TARIFF_E = 230;            // ₮/кВт·ц (ААН-ийн дундаж, жишиг)\nconst TARIFF_H = 32000;          // ₮/Гкал (жишиг)\nconst EF_E = 0.95;               // кг CO₂/кВт·ц — Төвийн эрчим хүчний систем (нүүрс давамгайлсан)\nconst EF_H = 0.40;               // т CO₂/Гкал — ДЦС-ын дулаан\nconst BENCH = { 'Оффис': 260, 'Сургууль': 280, 'Цэцэрлэг': 300, 'Эмнэлэг': 380, 'Худалдааны төв': 330,\n                'Орон сууц': 250, 'Зочид буудал': 340, 'Үйлдвэр': null };\nconst heat_kwh = gcal * GCAL_KWH;\nconst total_kwh = elec + heat_kwh;\nconst eui = total_kwh / area;\nconst elec_cost = num(b.elec_cost_year) ?? elec * TARIFF_E;\nconst heat_cost = num(b.heat_cost_year) ?? gcal * TARIFF_H;\nconst total_cost = elec_cost + heat_cost;\nconst co2_t = elec * EF_E / 1000 + gcal * EF_H;\nconst scale = [[100,'A','Маш сайн — шинэ, эрчим хүчний хэмнэлттэй барилгын түвшин'],[150,'B','Сайн'],[200,'C','Дунджаас сайн'],\n  [250,'D','Дундаж'],[300,'E','Дунджаас муу — хэмнэлтийн боломж их'],[400,'F','Муу — дулаан алдагдал өндөр'],[Infinity,'G','Маш муу — яаралтай арга хэмжээ хэрэгтэй']];\nconst [, grade, grade_text] = scale.find(([lim]) => eui <= lim);\nconst bench = BENCH[b.building_type] ?? null;\nconst r = (v, d = 0) => Math.round(v * 10 ** d) / 10 ** d;\nconst metrics = {\n  area_m2: area, elec_kwh: r(elec), heat_kwh: r(heat_kwh), total_kwh: r(total_kwh),\n  heat_share_pct: r(heat_kwh / total_kwh * 100), elec_share_pct: r(elec / total_kwh * 100),\n  eui_kwh_m2: r(eui), benchmark_kwh_m2: bench, vs_benchmark_pct: bench ? r((eui / bench - 1) * 100) : null,\n  grade, grade_text, elec_cost: r(elec_cost), heat_cost: r(heat_cost), total_cost: r(total_cost),\n  co2_t: r(co2_t, 1),\n  saving_cost_low: r(total_cost * 0.10), saving_cost_mid: r(total_cost * 0.20), saving_cost_high: r(total_cost * 0.30),\n  saving_kwh_mid: r(total_kwh * 0.20), saving_co2_mid: r(co2_t * 0.20, 1),\n  assumptions: { gcal_to_kwh: GCAL_KWH, tariff_elec: TARIFF_E, tariff_heat: TARIFF_H, ef_elec: EF_E, ef_heat: EF_H },\n};\nreturn [{ json: { input: b, metrics } }];\n"
+      }
+    },
+    {
+      "id": "4fda2c80-d774-53a9-8743-a307b0890ce2",
+      "name": "AI: зөвлөмж бичих",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        420,
+        -50
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Харилцагч: {{ $json.input.client_name }}{{ $json.input.company ? ' (' + $json.input.company + ')' : '' }}\nБарилгын төрөл: {{ $json.input.building_type }}\nТооцооны үр дүн (JSON): {{ JSON.stringify($json.metrics) }}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessagePromptTemplate",
+              "message": "Чи «Энержи Баланс ХХК» (Energy Balance, energybalance.mn)-ийн нэрийн өмнөөс бичнэ — Улаанбаатарт байрладаг эрчим хүчний аудит, барилгын эрчим хүчний гэрчилгээжүүлэлт, ISO 50001 зөвлөх үйлчилгээ үзүүлдэг компани.\nУриа: «Эрчим хүчний зохистой хэрэглээ — Бизнесийн амжилт.»\nБрэндийн дуу хоолой (Brand Book V1): санаа тавьдаг инженер шиг ярина — тайван, нарийн, тустай. Айдас төрүүлэхгүй, хэт сурталчлахгүй.\n- Тодорхой: богино өгүүлбэр, нэг санаа. Мэргэжлийн үгийг тайлбаргүй хэрэглэхгүй.\n- Нотолгоотой: тоо, хэмжилтэд тулгуурла. Таамаг тоо зохиохгүй; нарийн тоог аудитаар тодорхойлно гэж хэл.\n- Бүтээлч: алдагдлыг нэрлээд, шийдэл ба нөхөх хугацааг хэл.\n- Анхаарлын тэмдэг (!) болон эможи хэрэглэхгүй. «энерги» биш «эрчим хүч», «эко» биш «байгальд ээлтэй», «асар их хэмнэлт» биш «10–30% хэмнэлт» гэж бич.\nКомпанийн баримт: эхний жилд эрчим хүчний зардал 10–30% буурдаг; хөрөнгө оруулалт дунджаар 18–36 сард нөхөгддөг; хүлэмжийн хийн ялгарал 10–30% буурдаг; Эрчим Хүчний Зохицуулах Хорооны үнэлгээ 92.3% (2025); үйлчлүүлэгчийн сэтгэл ханамж 9.5/10. Үнэгүй 30 минутын анхан шатны зөвлөгөө өгдөг.\nХолбоо барих: +976 8811 3855 · energybalance.mgl@gmail.com · ХУД 8-р хороо, Нүхт 247 · energybalance.mn\n\nДаалгавар: урьдчилсан эрчим хүчний балансын тооцоонд тулгуурлан харилцагчид зориулсан товч дүгнэлт, зөвлөмж бичнэ.\nФормат — Markdown, 180–280 үг:\n1. Эхэнд 2 өгүүлбэрийн дүгнэлт: кВт·ц/м²·жил, зэрэглэл, жишигтэй харьцуулалт (жишиг байвал), дулаан ба цахилгааны хувь.\n2. «### Санал болгох арга хэмжээ» — барилгын төрөлд тохирсон 4 арга хэмжээ, дугаарласан жагсаалт. Тус бүрд: юу хийх, хүлээгдэх хэмнэлт (%), нөхөх хугацаа (сар) — бодитой муж ашигла (жишээ «8–12%», «18–30 сар»).\n3. «### Дараагийн алхам» — нэг өгүүлбэр: үнэгүй 30 минутын зөвлөгөө эсвэл нарийвчилсан аудит.\nТоог өгөгдсөн тооцооноос л ав. Энэ бол урьдчилсан үнэлгээ гэдгийг нэг удаа дурд. Анхаарлын тэмдэг, эможи хэрэглэхгүй."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "4d0ac83d-dfda-57d5-bfee-e82f6da65deb",
+      "name": "Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        490,
+        170
+      ],
+      "parameters": {
+        "modelName": "models/__GEMINI_MODEL__",
+        "options": {
+          "maxOutputTokens": 7600,
+          "temperature": 0.4
+        }
+      },
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ebGemini00000001",
+          "name": "Google Gemini"
+        }
+      }
+    },
+    {
+      "id": "ef1772ef-ddea-5a68-94e9-3bdfd50947c0",
+      "name": "Тайлан хадгалах",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        750,
+        -50
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO energy_reports (client_name, email, company, building_type, area_m2, elec_kwh_year, heat_gcal_year, elec_cost_year, heat_cost_year, metrics, recommendations) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11) RETURNING id",
+        "options": {
+          "queryReplacement": "={{ [ $('Тооцоо').item.json.input.client_name ] }},{{ [ $('Тооцоо').item.json.input.email || '' ] }},{{ [ $('Тооцоо').item.json.input.company || '' ] }},{{ [ $('Тооцоо').item.json.input.building_type ] }},{{ [ $('Тооцоо').item.json.input.area_m2 ] }},{{ [ $('Тооцоо').item.json.input.elec_kwh_year ] }},{{ [ $('Тооцоо').item.json.input.heat_gcal_year || 0 ] }},{{ [ $('Тооцоо').item.json.metrics.elec_cost ] }},{{ [ $('Тооцоо').item.json.metrics.heat_cost ] }},{{ [ JSON.stringify($('Тооцоо').item.json.metrics) ] }},{{ [ $('AI: зөвлөмж бичих').item.json.text ] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "ebPostgres000001",
+          "name": "Energy Balance DB"
+        }
+      }
+    },
+    {
+      "id": "9177288b-94fa-55db-8f91-2ed02993b798",
+      "name": "Хариу буцаах",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        960,
+        -50
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ report_id: $json.id, metrics: $('Тооцоо').item.json.metrics, recommendations: $('AI: зөвлөмж бичих').item.json.text }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "048e52af-e31c-545e-b705-39be104aa1ad",
+      "name": "И-мэйл бэлдэх",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1170,
+        -50
+      ],
+      "parameters": {
+        "jsCode": "\nconst esc = s => String(s ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));\nfunction brandEmail(title, bodyHtml) {\n  return `<div style=\"background:#F4F7F4;padding:24px 0;font-family:Inter,Arial,sans-serif;color:#183A27\">\n  <div style=\"max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #E1E8E2\">\n    <div style=\"background:#1F5E3B;padding:18px 24px;color:#fff;letter-spacing:4px;font-size:13px\">ENERGY BALANCE</div>\n    <div style=\"padding:24px;font-size:15px;line-height:1.6\">\n      <div style=\"color:#3A8F5C;font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px\">${esc(title)}</div>\n      ${bodyHtml}\n    </div>\n    <div style=\"border-top:3px solid #8DC149;padding:16px 24px;font-size:12px;color:#3A8F5C\">\n      Энержи Баланс ХХК · +976 8811 3855 · energybalance.mn<br>Эрчим хүчний зохистой хэрэглээ — Бизнесийн амжилт.\n    </div>\n  </div></div>`;\n}\nconst textToHtml = t => esc(t).split(/\\n{2,}/).map(p => `<p style=\"margin:0 0 12px\">${p.replace(/\\n/g,'<br>')}</p>`).join('');\n\nconst c = $('Тооцоо').first().json, rec = $('AI: зөвлөмж бичих').first().json.text || '';\nconst id = $('Тайлан хадгалах').first().json.id, m = c.metrics, to = (c.input.email || '').trim();\nif (!to) return [];\nconst fmt = n => Number(n).toLocaleString('en-US').replace(/,/g, \"'\");\nconst md = s => esc(s).replace(/^### (.*)$/gm, '<h3 style=\"color:#1F5E3B;font-size:16px;margin:18px 0 6px\">$1</h3>')\n  .replace(/\\*\\*(.+?)\\*\\*/g, '<b>$1</b>').replace(/^\\d+\\. (.*)$/gm, '<p style=\"margin:0 0 8px;padding-left:14px;border-left:3px solid #8DC149\">$1</p>')\n  .replace(/^[-—] (.*)$/gm, '<p style=\"margin:0 0 6px\">— $1</p>').replace(/\\n{2,}/g, '<br>');\nconst kpi = (v, l, dark) => `<td style=\"padding:12px;background:${dark ? '#1F5E3B' : '#F4F7F4'};border-radius:8px;width:33%\">\n  <div style=\"font-size:20px;color:${dark ? '#fff' : '#1F5E3B'}\">${v}</div><div style=\"font-size:11px;color:${dark ? '#8DC149' : '#3A8F5C'}\">${l}</div></td>`;\nconst body = `<p style=\"margin:0 0 14px\">Сайн байна уу, ${esc(c.input.client_name)}. Таны оруулсан мэдээллээр урьдчилсан эрчим хүчний балансыг тооцлоо.</p>\n<table style=\"width:100%;border-spacing:6px;margin:0 -6px 10px\"><tr>${kpi(m.grade + ' · ' + fmt(m.eui_kwh_m2), 'Зэрэглэл · кВт·ц/м²·жил', true)}${kpi(fmt(m.co2_t) + ' т', 'CO₂ ялгарал/жил')}${kpi(fmt(m.saving_cost_mid) + '₮', 'Боломжит хэмнэлт/жил (~20%)')}</tr></table>\n${md(rec)}`;\nreturn [{ json: { to, subject: `Эрчим хүчний урьдчилсан тайлан №${id} — ${c.input.company || c.input.client_name}`,\n  html: brandEmail('Эрчим хүчний урьдчилсан тайлан', body),\n  text: `Тайлан №${id}\\nЗэрэглэл: ${m.grade} (${m.eui_kwh_m2} кВт·ц/м²·жил)\\nCO2: ${m.co2_t} т/жил\\n\\n${rec}\\n\\nEnergy Balance · +976 8811 3855 · energybalance.mn` } }];\n"
+      }
+    },
+    {
+      "id": "5cd7b2b9-e6d2-520f-b6c0-9877078ee3ee",
+      "name": "Тайлан илгээх (SMTP)",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1380,
+        -50
+      ],
+      "parameters": {
+        "fromEmail": "Energy Balance <__MAIL_FROM__>",
+        "toEmail": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "both",
+        "text": "={{ $json.text }}",
+        "html": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "smtp": {
+          "id": "ebSmtpMailpit001",
+          "name": "Mailpit SMTP (Gmail-ийн орлуулагч)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Тооцоо",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Тооцоо": {
+      "main": [
+        [
+          {
+            "node": "AI: зөвлөмж бичих",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: зөвлөмж бичих": {
+      "main": [
+        [
+          {
+            "node": "Тайлан хадгалах",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Тайлан хадгалах": {
+      "main": [
+        [
+          {
+            "node": "Хариу буцаах",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Хариу буцаах": {
+      "main": [
+        [
+          {
+            "node": "И-мэйл бэлдэх",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "И-мэйл бэлдэх": {
+      "main": [
+        [
+          {
+            "node": "Тайлан илгээх (SMTP)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI: зөвлөмж бичих",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

@@ -1,0 +1,57 @@
+/* Energy Balance — брэндийн токенууд (Visual Brand Book V1, brand/brand-book.md) */
+:root {
+  --green: #1F5E3B;        /* Үндсэн */
+  --green-600: #184C30;
+  --green-2: #3A8F5C;      /* Хоёрдогч */
+  --lime: #8DC149;         /* Онцлох — хэмнэлттэй */
+  --green-dark: #1F5E3B;
+  --mint: #E8F1EA;
+  --mint-2: #F4F7F4;       /* Саармаг */
+  --base: #DFE6E0;         /* Графикийн суурь */
+  --ink: #183A27;
+  --muted: #5E7466;
+  --line: #E1E8E2;
+  --white: #FFFFFF;
+  --danger: #B5462F;
+  --radius: 14px;
+  --shadow: 0 10px 30px rgba(31, 94, 59, .08);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--ink);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--white); line-height: 1.55; }
+a { color: var(--green-2); }
+h1, h2, h3 { line-height: 1.2; margin: 0 0 .5em; color: var(--green); font-weight: 600; letter-spacing: -.01em; }
+.wordmark { font-family: "Average Sans", "Inter", sans-serif; letter-spacing: .28em; text-transform: uppercase; color: var(--green); }
+.eyebrow { font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--green-2); font-weight: 500; }
+.btn { display: inline-flex; align-items: center; gap: .5em; border: 1px solid var(--green); border-radius: 8px; padding: .72em 1.2em;
+  font: inherit; font-weight: 500; cursor: pointer; text-decoration: none; background: var(--green); color: #fff; }
+.btn:hover { background: var(--green-600); }
+.btn.ghost { background: #fff; color: var(--green); border-color: var(--green); }
+.btn.ghost:hover { background: var(--mint-2); }
+.btn.lime { background: var(--lime); border-color: var(--lime); color: var(--green); }
+.btn.danger { background: #fff; color: var(--danger); border-color: #EBC9C0; }
+.btn.sm { padding: .38em .75em; font-size: .85rem; border-radius: 7px; }
+.btn[disabled] { opacity: .6; cursor: wait; }
+input, select, textarea { width: 100%; font: inherit; padding: .65em .8em; border: 1px solid var(--line);
+  border-radius: 8px; background: #fff; color: var(--ink); }
+input:focus, select:focus, textarea:focus { outline: 2px solid rgba(58,143,92,.25); border-color: var(--green-2); }
+label { font-size: .82rem; font-weight: 500; color: var(--muted); display: block; margin-bottom: .3em; }
+.field { margin-bottom: .9em; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1em; }
+@media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+.card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 1.25rem; }
+.badge { display: inline-block; padding: .15em .6em; border-radius: 999px; font-size: .76rem; font-weight: 600; white-space: nowrap; }
+.b-new { background: #EEF6E3; color: #4E7A1C; }
+.b-sent { background: #E3EEF7; color: #2A5A85; }
+.b-ok { background: var(--mint); color: var(--green); }
+.b-no { background: #F8E9E5; color: var(--danger); }
+.b-grey { background: var(--mint-2); color: var(--muted); }
+.muted { color: var(--muted); }
+.spinner { width: 1em; height: 1em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+  display: inline-block; animation: spin .7s linear infinite; vertical-align: -2px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+/* A–G зэрэглэл — зөвхөн ногоон, бараан нь хамгийн сайн */
+.g-A { background: #1F5E3B; } .g-B { background: #2B7148; } .g-C { background: #3A8F5C; }
+.g-D { background: #66A852; } .g-E { background: #8DC149; } .g-F { background: #B9D98E; color: var(--green) !important; }
+.g-G { background: #DFE6E0; color: var(--green) !important; }

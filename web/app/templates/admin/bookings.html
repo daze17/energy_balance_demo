@@ -1,0 +1,34 @@
+{% extends "admin/base.html" %}
+{% block title %}Захиалга{% endblock %}
+{% block h1 %}Захиалга{% endblock %}
+{% block body %}
+{% set cls = {'Шинэ':'b-new','Илгээсэн':'b-sent','Батлагдсан':'b-ok','Татгалзсан':'b-no'} %}
+<div class="tabs" style="margin-bottom:14px">
+  <a href="/admin/bookings" class="{{ 'on' if not current }}">Бүгд</a>
+  {% for s in statuses %}<a href="/admin/bookings?status={{ s }}" class="{{ 'on' if current==s }}">{{ s }}</a>{% endfor %}
+</div>
+<table>
+  <tr><th>#</th><th>Огноо</th><th>Харилцагч</th><th>Үйлчилгээ</th><th>Эх сурвалж</th><th>Төлөв</th><th>Үйлдэл</th></tr>
+  {% for b in rows %}
+  <tr>
+    <td>{{ b.id }}</td>
+    <td>{{ b.created_at.strftime('%Y-%m-%d %H:%M') }}{% if b.preferred_date %}<br><small class="muted">Уулзах: {{ b.preferred_date }}</small>{% endif %}</td>
+    <td><b>{{ b.name }}</b>{% if b.company %}<br>{{ b.company }}{% endif %}<br><small class="muted">{{ b.email or '' }} {{ b.phone or '' }}</small>
+      {% if b.message %}<br><small>“{{ b.message }}”</small>{% endif %}</td>
+    <td>{{ b.service_name or '—' }}<br><small class="muted">{{ b.building_type or '' }}</small></td>
+    <td>{% if b.source=='chat' %}<span class="badge b-grey">💬 чат агент</span>{% elif b.source=='phone' %}<span class="badge b-grey">📞 утас</span>{% else %}<span class="badge b-grey">🌐 веб</span>{% endif %}</td>
+    <td><span class="badge {{ cls.get(b.status,'b-grey') }}">{{ b.status }}</span>
+      {% if b.staff_name %}<br><small class="muted">👤 {{ b.staff_name }}</small>{% endif %}
+      {% if b.confirmation_email %}<details><summary style="font-size:.8rem;cursor:pointer;color:var(--green)">AI и-мэйл</summary><div style="font-size:.82rem;white-space:pre-wrap;max-width:360px">{{ b.confirmation_email }}</div></details>{% endif %}</td>
+    <td>
+      <form method="post" action="/admin/bookings/{{ b.id }}/status" class="inline">
+        <select name="staff_id"><option value="">Ажилтан…</option>{% for s in staff %}<option value="{{ s.id }}" {{ 'selected' if s.id==b.assigned_staff_id }}>{{ s.name }}</option>{% endfor %}</select>
+        <button class="btn sm" name="status" value="Батлагдсан">Батлах</button>
+        <button class="btn sm danger" name="status" value="Татгалзсан">Татгалзах</button>
+      </form>
+      {% if b.email %}<form method="post" action="/admin/bookings/{{ b.id }}/resend" style="margin-top:6px"><button class="btn sm ghost">🤖 И-мэйл дахин</button></form>{% endif %}
+    </td>
+  </tr>
+  {% else %}<tr><td colspan="7" class="muted">Захиалга алга.</td></tr>{% endfor %}
+</table>
+{% endblock %}

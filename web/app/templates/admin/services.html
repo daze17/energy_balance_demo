@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+{% block title %}Үйлчилгээ{% endblock %}
+{% block h1 %}Үйлчилгээ{% endblock %}
+{% block body %}
+<div class="row" style="grid-template-columns:1.6fr 1fr">
+  <table>
+    <tr><th>Нэр</th><th>Үнэ</th><th>Хугацаа</th><th>Төлөв</th><th></th></tr>
+    {% for s in rows %}
+    <tr>
+      <td><b>{{ s.name }}</b><br><small class="muted">{{ s.short_desc }}</small></td>
+      <td>{{ s.price_from|money }}{% if s.price_note %}<br><small class="muted">{{ s.price_note }}</small>{% endif %}</td>
+      <td>{{ s.duration or '—' }}</td>
+      <td>{% if s.active %}<span class="badge b-ok">идэвхтэй</span>{% else %}<span class="badge b-grey">нуусан</span>{% endif %}</td>
+      <td style="white-space:nowrap"><a class="btn sm ghost" href="/admin/services?edit={{ s.id }}">Засах</a>
+        {% if s.active %}<form method="post" action="/admin/services/{{ s.id }}/delete" style="display:inline"><button class="btn sm danger">Нуух</button></form>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <form method="post" action="/admin/services" class="card">
+    <h3>{{ 'Засах: ' ~ item.name if item else 'Шинэ үйлчилгээ' }}</h3>
+    <input type="hidden" name="id" value="{{ item.id if item else '' }}">
+    <div class="field"><label>Нэр</label><input name="name" required value="{{ item.name if item else '' }}"></div>
+    <div class="field"><label>Товч тайлбар</label><input name="short_desc" required value="{{ item.short_desc if item else '' }}"></div>
+    <div class="field"><label>Дэлгэрэнгүй</label><textarea name="description" rows="4" required>{{ item.description if item else '' }}</textarea></div>
+    <div class="grid2">
+      <div class="field"><label>Үнэ (₮-с эхэлнэ)</label><input name="price_from" type="number" min="0" value="{{ item.price_from if item and item.price_from is not none else '' }}"></div>
+      <div class="field"><label>Хугацаа</label><input name="duration" value="{{ item.duration or '' if item else '' }}"></div>
+      <div class="field"><label>Үнийн тайлбар</label><input name="price_note" value="{{ item.price_note or '' if item else '' }}"></div>
+      <div class="field"><label>Дараалал</label><input name="sort_order" type="number" value="{{ item.sort_order if item else 10 }}"></div>
+    </div>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="active" value="1" style="width:auto" {{ 'checked' if not item or item.active }}> Нүүр хуудсанд харуулах</label>
+    <p><button class="btn">Хадгалах</button> {% if item %}<a class="btn ghost" href="/admin/services">Болих</a>{% endif %}</p>
+    <p class="muted" style="font-size:.8rem">Энд засахад нүүр хуудас болон чат агентын хариулт шууд шинэчлэгдэнэ.</p>
+  </form>
+</div>
+{% endblock %}

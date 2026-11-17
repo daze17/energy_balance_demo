@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+{% block title %}Чат{% endblock %}
+{% block h1 %}Чат агентын яриа{% endblock %}
+{% block body %}
+<div class="card" style="margin-bottom:16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+  <div style="flex:1;min-width:260px"><div class="eyebrow">Чатбот суулгах</div>
+    <p class="muted" style="margin:6px 0 0;font-size:.88rem">Энэ нэг мөрийг аль ч вэб сайтын (жишээ нь energybalance.mn) <code>&lt;/body&gt;</code>-ийн өмнө нэмэхэд AI зөвлөх чат гарч ирнэ. Сайтын бусад товчинд <code>data-eb-chat="Асуулт"</code> өгвөл чатыг нээж, тэр асуултыг асууна.</p></div>
+  <code style="background:var(--mint-2);padding:10px 12px;border-radius:8px;font-size:.82rem;user-select:all">&lt;script src="{{ request.base_url }}static/js/chat-widget.js" defer&gt;&lt;/script&gt;</code>
+</div>
+<div class="row" style="grid-template-columns:320px 1fr">
+  <div class="card" style="padding:8px;max-height:72vh;overflow-y:auto">
+    {% for s in sessions %}
+    <a href="/admin/chat?s={{ s.session_id }}" style="display:block;padding:10px;border-radius:8px;text-decoration:none;color:var(--ink);{{ 'background:var(--mint)' if s.session_id==sel }}">
+      <b style="font-size:.88rem;font-weight:600">{{ (s.first_q or '…')[:48] }}</b><br>
+      <small class="muted">{{ s.last.strftime('%m/%d %H:%M') }} · {{ s.n }} мессеж</small>
+    </a>
+    {% else %}<p class="muted" style="padding:10px">Яриа алга. Нүүр хуудасны чат товчоор асууж үзээрэй.</p>{% endfor %}
+  </div>
+  <div class="card" style="background:#fff;max-height:72vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px">
+    {% for m in msgs %}
+    <div style="max-width:80%;padding:9px 12px;border-radius:14px;white-space:pre-wrap;font-size:.92rem;
+      {{ 'align-self:flex-end;background:var(--green);color:#fff' if m.role=='user' else 'align-self:flex-start;background:var(--mint-2)' }}">{{ m.content }}
+      <div style="font-size:.68rem;opacity:.75;margin-top:3px">{{ 'Харилцагч' if m.role=='user' else 'AI агент' }} · {{ m.created_at.strftime('%H:%M:%S') }}</div></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

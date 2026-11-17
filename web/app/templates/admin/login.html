@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Нэвтрэх · Energy Balance Admin</title>
+<link rel="icon" href="/brand/logo.svg">
+<link href="https://fonts.googleapis.com/css2?family=Average+Sans&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/brand.css">
+<style>
+  body { min-height: 100vh; display: grid; place-items: center; background: var(--green); padding: 16px; position: relative; overflow: hidden; }
+  body::after { content: ""; position: fixed; right: -180px; bottom: -220px; width: 560px; height: 560px; border-radius: 50%;
+    background: var(--lime); box-shadow: 0 0 0 110px var(--green-2); z-index: 0; }
+  .box { width: min(400px, 100%); background: #fff; border-radius: 18px; padding: 32px; box-shadow: 0 30px 60px rgba(0,0,0,.2); position: relative; z-index: 1; }
+  .box img { width: 150px; display: block; margin: 0 auto 6px; }
+</style>
+</head>
+<body>
+  <form class="box" method="post" action="/admin/login">
+    <img src="/brand/logo-full.svg" alt="Energy Balance">
+    <h2 style="text-align:center;font-size:1.1rem;color:var(--green-2);font-weight:500">Админ самбар</h2>
+    {% if error %}<p style="color:var(--danger)">И-мэйл эсвэл нууц үг буруу байна.</p>{% endif %}
+    <div class="field"><label>И-мэйл</label><input name="email" type="email" required autofocus></div>
+    <div class="field"><label>Нууц үг</label><input name="password" type="password" required></div>
+    <button class="btn" style="width:100%;justify-content:center">Нэвтрэх</button>
+    <p class="muted" style="font-size:.8rem;margin-bottom:0">Локал демо — нэвтрэх мэдээлэл <code>.env</code> файлд.</p>
+  </form>
+</body>
+</html>
