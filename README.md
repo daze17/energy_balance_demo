@@ -12,8 +12,6 @@
 | n8n                      | https://n8n-production-0a370bb0.up.railway.app       |
 | И-мэйл хайрцаг (Mailpit) | https://mailpit-production-23ec243f.up.railway.app   |
 
-Нэвтрэх мэдээлэл: локал `.env.railway` файлд (git-д ордоггүй). Дэлгэрэнгүй: [docs/DEPLOY_RAILWAY.md](docs/DEPLOY_RAILWAY.md).
-
 ## Capstone-ийн шаардлага (Google Classroom · EBRD_Capstone.pptx)
 
 - Хамгаалалт: **20/11, биечлэн**. Багшид шалгуулах: **18/11-ний өмнө** танилцуулгын линк, ажиллаж буй видео, системийн холбоос.
