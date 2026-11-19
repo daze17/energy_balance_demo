@@ -3,7 +3,9 @@ import bcrypt
 from fastapi import APIRouter, BackgroundTasks, Form, Request
 from fastapi.responses import RedirectResponse
 
-from . import agents, db
+from urllib.parse import quote
+
+from . import agents, db, facebook as fb
 
 router = APIRouter(prefix="/admin")
 
@@ -191,11 +193,11 @@ def staff_delete(request: Request, sid: int):
 # ---------- Контент (Агент 3) + Facebook ----------
 
 @router.get("/content")
-def content(request: Request, error: str | None = None):
+def content(request: Request, error: str | None = None, fb_error: str | None = None):
     if not authed(request):
         return back("/admin/login")
     rows = db.all("SELECT * FROM posts ORDER BY (status='Хүлээгдэж буй') DESC, created_at DESC")
-    return render(request, "admin/content.html", rows=rows, error=error)
+    return render(request, "admin/content.html", rows=rows, error=error, fb_error=fb_error, fb_live=fb.enabled())
 
 
 @router.post("/content/generate")
@@ -213,6 +215,13 @@ def post_status(request: Request, pid: int, status: str = Form(...), caption: st
     if authed(request) and status in ("Нийтэлсэн", "Татгалзсан", "Хүлээгдэж буй"):
         if caption is not None:
             db.run("UPDATE posts SET caption=%s WHERE id=%s", (caption, pid))
+        post = db.one("SELECT caption, fb_post_id FROM posts WHERE id=%s", (pid,))
+        # Бодит Page холбогдсон бол эхлээд Facebook-т нийтэлнэ; амжилтгүй бол «Хүлээгдэж буй» хэвээр үлдэнэ
+        if status == "Нийтэлсэн" and fb.enabled() and post and not post["fb_post_id"]:
+            out = fb.publish(post["caption"])
+            if out.get("error"):
+                return back("/admin/content?fb_error=" + quote(out["error"][:300]))
+            db.run("UPDATE posts SET fb_post_id=%s WHERE id=%s", (out["id"], pid))
         db.run("""UPDATE posts SET status=%s,
                   published_at = CASE WHEN %s='Нийтэлсэн' THEN now() ELSE published_at END WHERE id=%s""",
                (status, status, pid))
@@ -224,7 +233,7 @@ def facebook(request: Request):
     if not authed(request):
         return back("/admin/login")
     rows = db.all("SELECT * FROM posts WHERE status='Нийтэлсэн' ORDER BY published_at DESC")
-    return render(request, "admin/facebook.html", rows=rows)
+    return render(request, "admin/facebook.html", rows=rows, fb_live=fb.enabled(), fb_page_id=fb.PAGE_ID)
 
 
 # ---------- Чат (Агент 2) ----------

@@ -1,8 +1,12 @@
 {% extends "admin/base.html" %}
 {% block title %}Facebook{% endblock %}
-{% block h1 %}Facebook Page (локал загвар){% endblock %}
+{% block h1 %}Facebook Page{% if not fb_live %} (локал загвар){% endif %}{% endblock %}
 {% block body %}
-<p class="muted" style="margin-top:-10px">Бодит Meta App, Page Token-ий оронд батлагдсан постууд энд нийтлэгдэнэ. Бодит Page-тэй холбоход n8n дээр Facebook Graph API node нэмэхэд хангалттай.</p>
+{% if fb_live %}
+<p class="muted" style="margin-top:-10px">Бодит Facebook Page холбогдсон. Батлагдсан пост Graph API-аар <a href="https://www.facebook.com/{{ fb_page_id }}" target="_blank" rel="noopener">Page</a> дээр нийтлэгдэнэ.</p>
+{% else %}
+<p class="muted" style="margin-top:-10px">Бодит Page холбогдоогүй тул батлагдсан постууд энд загвар хэлбэрээр харагдана. Холбохын тулд <code>.env</code>-д <code>FB_PAGE_ID</code>, <code>FB_PAGE_ACCESS_TOKEN</code> бичнэ.</p>
+{% endif %}
 <div style="max-width:560px;margin:0 auto">
   <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">
     <!-- Brand Book 10: Facebook нүүр зураг 820×312 -->
@@ -21,7 +25,7 @@
   <div class="card" style="margin-bottom:14px">
     <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
       <img src="/brand/logo.svg" style="width:40px;height:40px;border-radius:50%">
-      <div><b>Энержи Баланс ХХК</b><br><small class="muted">{{ p.published_at.strftime('%m/%d %H:%M') if p.published_at }} · Нийтийн{% if p.source=='ai' %} · AI агент бэлдсэн{% endif %}</small></div>
+      <div><b>Энержи Баланс ХХК</b><br><small class="muted">{{ p.published_at.strftime('%m/%d %H:%M') if p.published_at }} · Нийтийн{% if p.source=='ai' %} · AI агент бэлдсэн{% endif %}{% if p.fb_post_id %} · <a href="https://www.facebook.com/{{ p.fb_post_id }}" target="_blank" rel="noopener">Facebook дээр харах</a>{% endif %}</small></div>
     </div>
     <div style="white-space:pre-wrap;font-size:.94rem">{{ p.caption }}</div>
     {% if p.slides %}

@@ -74,7 +74,8 @@ CREATE TABLE posts (
   status       TEXT NOT NULL DEFAULT 'Хүлээгдэж буй',  -- Хүлээгдэж буй | Нийтэлсэн | Татгалзсан
   source       TEXT NOT NULL DEFAULT 'ai',
   published_at TIMESTAMPTZ,
-  likes        INT NOT NULL DEFAULT 0
+  likes        INT NOT NULL DEFAULT 0,
+  fb_post_id   TEXT                    -- бодит Facebook Page дээрх постын ID (холбогдсон үед)
 );
 
 CREATE TABLE chat_messages (

@@ -2,6 +2,7 @@
 {% block title %}Контент{% endblock %}
 {% block h1 %}Контент агент{% endblock %}
 {% block body %}
+{% if fb_error %}<div class="flash">Facebook-т нийтэлж чадсангүй: {{ fb_error }}. Пост «Хүлээгдэж буй» хэвээр үлдлээ.</div>{% endif %}
 {% if error %}<div class="flash">Агент ажиллахад алдаа гарлаа. «Агентууд» цэснээс алдааг харна уу (ANTHROPIC_API_KEY тохируулсан эсэх).</div>{% endif %}
 <form method="post" action="/admin/content/generate" class="card" style="display:flex;gap:10px;align-items:end;margin-bottom:14px;flex-wrap:wrap"
       onsubmit="const b=this.querySelector('button');b.disabled=true;b.innerHTML='<span class=spinner></span> AI бичиж байна…'">
@@ -9,7 +10,7 @@
     <input name="topic" placeholder="Жишээ: өвлийн дулаан алдагдал, ногоон зээл, ISO 50001, LED гэрэлтүүлэг"></div>
   <button class="btn">Пост бэлдэх</button>
 </form>
-<p class="muted" style="margin:0 0 18px;font-size:.88rem">Агент Brand Book-ийн дуу хоолойгоор Facebook пост ба карусель слайд бүрийн зургийн prompt-ыг <code>{caption, slides[]}</code> JSON-оор бэлдэнэ. n8n дээр Даваа, Лхагва, Баасан 09:00-д автоматаар ажиллана. Хүн батлахаас өмнө нийтлэгдэхгүй.</p>
+<p class="muted" style="margin:0 0 18px;font-size:.88rem">Агент Brand Book-ийн дуу хоолойгоор Facebook пост ба карусель слайд бүрийн зургийн prompt-ыг <code>{caption, slides[]}</code> JSON-оор бэлдэнэ. n8n дээр Даваа, Лхагва, Баасан 09:00-д автоматаар ажиллана. Хүн батлахаас өмнө нийтлэгдэхгүй.{% if fb_live %} <b>Бодит Facebook Page холбогдсон</b> — батлахад шууд Page дээр гарна.{% endif %}</p>
 
 {% set cls = {'Хүлээгдэж буй':'b-new','Нийтэлсэн':'b-ok','Татгалзсан':'b-no'} %}
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px">

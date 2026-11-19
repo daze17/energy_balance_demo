@@ -62,6 +62,7 @@ app.include_router(admin_router)
 @app.on_event("startup")
 def ensure_admin():
     db.init_schema(os.environ.get("DB_INIT_DIR", "/app/db_init"))
+    db.run("ALTER TABLE posts ADD COLUMN IF NOT EXISTS fb_post_id TEXT")  # хуучин өгөгдлийн санд багана нэмнэ
     email = os.environ.get("ADMIN_EMAIL", "admin@energybalance.local")
     pw = os.environ.get("ADMIN_PASSWORD", "EnergyBalance2026")
     if not db.one("SELECT id FROM admin_users WHERE email=%s", (email,)):

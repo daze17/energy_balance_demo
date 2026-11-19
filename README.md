@@ -12,6 +12,14 @@
 | n8n                      | https://n8n-production-0a370bb0.up.railway.app       |
 | И-мэйл хайрцаг (Mailpit) | https://mailpit-production-23ec243f.up.railway.app   |
 
+## Нүүр хуудасны зургууд
+
+| Нүүр хэсэг | Үйлчилгээ (өгөгдлийн сангаас) |
+| --- | --- |
+| ![Нүүр хэсэг](docs/screenshots/hero.png) | ![Үйлчилгээ](docs/screenshots/services.png) |
+| **Эрчим хүчний тооцоолуур (Агент 4)** | **Захиалгын форм (Агент 1)** |
+| ![Эрчим хүчний тооцоолуур](docs/screenshots/calc.png) | ![Захиалгын форм](docs/screenshots/book.png) |
+
 ## Capstone-ийн шаардлага (Google Classroom · EBRD_Capstone.pptx)
 
 - Хамгаалалт: **20/11, биечлэн**. Багшид шалгуулах: **18/11-ний өмнө** танилцуулгын линк, ажиллаж буй видео, системийн холбоос.

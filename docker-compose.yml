@@ -106,6 +106,9 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-EnergyBalance2026}
       INTERNAL_TOKEN: ${INTERNAL_TOKEN:-local-internal-token}
       CHAT_ALLOWED_ORIGINS: ${CHAT_ALLOWED_ORIGINS:-*}
+      FB_PAGE_ID: ${FB_PAGE_ID:-}
+      FB_PAGE_ACCESS_TOKEN: ${FB_PAGE_ACCESS_TOKEN:-}
+      FB_GRAPH_VERSION: ${FB_GRAPH_VERSION:-}
       TZ: Asia/Ulaanbaatar
     ports:
       - "47080:8000"
