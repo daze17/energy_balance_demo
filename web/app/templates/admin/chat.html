@@ -12,7 +12,7 @@
     {% for s in sessions %}
     <a href="/admin/chat?s={{ s.session_id }}" style="display:block;padding:10px;border-radius:8px;text-decoration:none;color:var(--ink);{{ 'background:var(--mint)' if s.session_id==sel }}">
       <b style="font-size:.88rem;font-weight:600">{{ (s.first_q or '…')[:48] }}</b><br>
-      <small class="muted">{{ s.last.strftime('%m/%d %H:%M') }} · {{ s.n }} мессеж</small>
+      <small class="muted">{{ 'Messenger' if s.session_id.startswith('fb-') else 'Вэб чат' }} · {{ s.last.strftime('%m/%d %H:%M') }} · {{ s.n }} мессеж</small>
     </a>
     {% else %}<p class="muted" style="padding:10px">Яриа алга. Нүүр хуудасны чат товчоор асууж үзээрэй.</p>{% endfor %}
   </div>

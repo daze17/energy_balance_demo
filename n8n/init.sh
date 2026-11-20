@@ -5,7 +5,11 @@
 set -e
 
 PROVIDER=${LLM_PROVIDER:-gemini}
-SRC=/bootstrap/workflows/$PROVIDER
+# Жинхэнэ и-мэйл: SMTP2GO_API_KEY эсвэл BREVO_API_KEY байвал HTTPS API-аар, үгүй бол SMTP (Mailpit)-ээр илгээнэ
+MAILER=smtp
+[ -n "$BREVO_API_KEY" ] && MAILER=brevo
+[ -n "$SMTP2GO_API_KEY" ] && MAILER=smtp2go
+SRC=/bootstrap/workflows/$PROVIDER; [ "$MAILER" != smtp ] && SRC=$SRC-$MAILER
 [ -d "$SRC" ] || { echo "✗ LLM_PROVIDER='$PROVIDER' буруу — gemini эсвэл claude байна"; exit 1; }
 
 OUT=/tmp/eb-render
@@ -29,12 +33,14 @@ render() {
       -e "s|__DB_PASSWORD__|${DB_POSTGRESDB_PASSWORD:-$DB_PASSWORD}|g" \
       -e "s|__INTERNAL_TOKEN__|${INTERNAL_TOKEN}|g" \
       -e "s|__WEB_INTERNAL_URL__|${WEB_INTERNAL_URL:-http://web:8000}|g" \
+      -e "s|__SMTP2GO_API_KEY__|${SMTP2GO_API_KEY}|g" \
+      -e "s|__BREVO_API_KEY__|${BREVO_API_KEY}|g" \
       -e "s|__MAIL_FROM__|${MAIL_FROM}|g" \
       -e "s|__STAFF_EMAIL__|${STAFF_EMAIL}|g" \
       "$1" > "$2"
 }
 
-echo "→ AI загвар: $PROVIDER"
+echo "→ AI загвар: $PROVIDER · и-мэйл: $MAILER"
 if [ "$PROVIDER" = "gemini" ] && [ -z "$GEMINI_API_KEY" ]; then
   echo "⚠️  GEMINI_API_KEY хоосон — aistudio.google.com-оос авч .env-д нэмээд 'docker compose up -d' дахин ажиллуулна уу."
 fi

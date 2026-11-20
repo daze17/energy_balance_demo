@@ -17,6 +17,35 @@ SMTP = {"smtp": {"id": "ebSmtpMailpit001", "name": "Mailpit SMTP (Gmail-ийн �
 ANTH = {"anthropicApi": {"id": "ebAnthropic00001", "name": "Anthropic (Claude)"}}
 HOOK_AUTH = {"httpHeaderAuth": {"id": "ebHookAuth000001", "name": "Webhook token (X-Internal-Token)"}}
 FROM = "Energy Balance <__MAIL_FROM__>"
+# Жинхэнэ и-мэйл — HTTPS API (SMTP порт хаалттай хостинг дээр ч ажиллана). Хоёулаа үнэгүй багцтай.
+MAIL_API = {
+    "smtp2go": {"label": "SMTP2GO", "url": "https://api.smtp2go.com/v3/email/send",
+                "cred": {"httpHeaderAuth": {"id": "ebSmtp2goKey0001", "name": "SMTP2GO API key"}}},
+    "brevo": {"label": "Brevo", "url": "https://api.brevo.com/v3/smtp/email",
+              "cred": {"httpHeaderAuth": {"id": "ebBrevoApiKey001", "name": "Brevo API key"}}},
+}
+MAILER = "smtp"  # smtp | smtp2go | brevo — main хэсэгт солигдоно
+
+
+def MT():
+    """И-мэйл node-ийн нэрийн дагавар."""
+    return MAIL_API[MAILER]["label"] if MAILER in MAIL_API else "SMTP"
+
+
+def api_body(to, subject, text, html=None):
+    """JS object expression: провайдер бүрийн JSON бүтэц."""
+    if MAILER == "smtp2go":
+        o = "{ sender: 'Energy Balance <__MAIL_FROM__>', to: [" + to + "], subject: " + subject + ", text_body: " + text
+        return o + (", html_body: " + html if html else "") + " }"
+    o = ("{ sender: { name: 'Energy Balance', email: '__MAIL_FROM__' }, to: [{ email: " + to + " }], subject: " + subject
+         + ", textContent: " + text)
+    return o + (", htmlContent: " + html if html else "") + " }"
+
+
+def api_params(body_expr):
+    return {"method": "POST", "url": MAIL_API[MAILER]["url"], "authentication": "genericCredentialType",
+            "genericAuthType": "httpHeaderAuth", "sendBody": True, "contentType": "json",
+            "specifyBody": "json", "jsonBody": "={{ JSON.stringify(" + body_expr + ") }}", "options": {}}
 
 VOICE = """Чи «Энержи Баланс ХХК» (Energy Balance, energybalance.mn)-ийн нэрийн өмнөөс бичнэ — Улаанбаатарт байрладаг эрчим хүчний аудит, барилгын эрчим хүчний гэрчилгээжүүлэлт, ISO 50001 зөвлөх үйлчилгээ үзүүлдэг компани.
 Уриа: «Эрчим хүчний зохистой хэрэглээ — Бизнесийн амжилт.»
@@ -88,9 +117,32 @@ def pg(wf, name, pos, query, params=None):
 
 
 def email(wf, name, pos, to, subject, text, html):
+    if MAILER in MAIL_API:
+        x = lambda e: e.removeprefix("={{").removesuffix("}}").strip()
+        return node(wf, name, "n8n-nodes-base.httpRequest", 4.2, list(pos),
+                    api_params(api_body(x(to), x(subject), x(text), x(html))), MAIL_API[MAILER]["cred"])
     return node(wf, name, "n8n-nodes-base.emailSend", 2.1, list(pos), {
         "fromEmail": FROM, "toEmail": to, "subject": subject, "emailFormat": "both",
         "text": text, "html": html, "options": {"appendAttribution": False},
+    }, SMTP)
+
+
+def handoff_tool(wf, pos):
+    desc = "Менежерт и-мэйлээр мэдэгдэл илгээж, харилцагчийг хүнд шилжүүлнэ (гомдол, хөнгөлөлт, нарийн техникийн асуулт, хүнтэй ярих хүсэлт)."
+    subj = "$fromAI('subject', 'Товч гарчиг', 'string')"
+    body = "$fromAI('body', 'Харилцагчийн нэр, холбоо барих мэдээлэл, асуудлын товч агуулга', 'string')"
+    foot = "\n\n— Энэ мэдэгдлийг вэб чат AI агент илгээв."
+    if MAILER in MAIL_API:
+        expr = api_body("'__STAFF_EMAIL__'", "'[Чат → менежер] ' + " + subj, body + " + " + json.dumps(foot, ensure_ascii=False))
+        return node(wf, "handoff_to_staff", "n8n-nodes-base.httpRequestTool", 4.2, list(pos),
+                    {"toolDescription": desc, **api_params(expr)}, MAIL_API[MAILER]["cred"])
+    return node(wf, "handoff_to_staff", "n8n-nodes-base.emailSendTool", 2.1, list(pos), {
+        "descriptionType": "manual", "toolDescription": desc,
+        "fromEmail": FROM, "toEmail": "__STAFF_EMAIL__",
+        "subject": "=[Чат → менежер] {{ " + subj + " }}",
+        "emailFormat": "text",
+        "text": "={{ " + body + " }}" + foot,
+        "options": {"appendAttribution": False},
     }, SMTP)
 
 
@@ -168,7 +220,7 @@ return [{ json: { to: b.email, subject, text, booking_id: b.booking_id,
         chain(w, "AI: и-мэйл бичих", (260, 300), sys, text),
         llm(w, (260, 520), 900),
         code(w, "И-мэйл бэлдэх", (560, 300), prep),
-        email(w, "И-мэйл илгээх (SMTP)", (780, 300), "={{ $json.to }}", "={{ $json.subject }}", "={{ $json.text }}", "={{ $json.html }}"),
+        email(w, "И-мэйл илгээх (" + MT() + ")", (780, 300), "={{ $json.to }}", "={{ $json.subject }}", "={{ $json.text }}", "={{ $json.html }}"),
         pg(w, "Төлөв шинэчлэх", (1000, 300),
            "UPDATE bookings SET status = CASE WHEN status = 'Шинэ' THEN 'Илгээсэн' ELSE status END, "
            "confirmation_email = $1, confirmed_at = now() WHERE id = $2 RETURNING id, status",
@@ -177,7 +229,7 @@ return [{ json: { to: b.email, subject, text, booking_id: b.booking_id,
              "const e = $('И-мэйл бэлдэх').first().json;\n"
              "return [{ json: { ok: true, booking_id: e.booking_id, status: $input.first().json.status, to: e.to, subject: e.subject, email: e.text } }];"),
     ]
-    conn = main_conn("Webhook", "AI: и-мэйл бичих", "И-мэйл бэлдэх", "И-мэйл илгээх (SMTP)", "Төлөв шинэчлэх", "Хариу")
+    conn = main_conn("Webhook", "AI: и-мэйл бичих", "И-мэйл бэлдэх", "И-мэйл илгээх (" + MT() + ")", "Төлөв шинэчлэх", "Хариу")
     sub(conn, M(), "AI: и-мэйл бичих", "ai_languageModel")
     return workflow("ebAgent1Booking0", "Агент 1 · Захиалга баталгаажуулах", nodes, conn)
 
@@ -240,15 +292,7 @@ def wf_chat():
             ]},
             "options": {},
         }),
-        node(w, "handoff_to_staff", "n8n-nodes-base.emailSendTool", 2.1, [920, 560], {
-            "descriptionType": "manual",
-            "toolDescription": "Менежерт и-мэйлээр мэдэгдэл илгээж, харилцагчийг хүнд шилжүүлнэ (гомдол, хөнгөлөлт, нарийн техникийн асуулт, хүнтэй ярих хүсэлт).",
-            "fromEmail": FROM, "toEmail": "__STAFF_EMAIL__",
-            "subject": "=[Чат → менежер] {{ $fromAI('subject', 'Товч гарчиг', 'string') }}",
-            "emailFormat": "text",
-            "text": "={{ $fromAI('body', 'Харилцагчийн нэр, холбоо барих мэдээлэл, асуудлын товч агуулга', 'string') }}\n\n— Энэ мэдэгдлийг вэб чат AI агент илгээв.",
-            "options": {"appendAttribution": False},
-        }, SMTP),
+        handoff_tool(w, (920, 560)),
     ]
     conn = main_conn("Webhook", "AI Agent")
     sub(conn, M(), "AI Agent", "ai_languageModel")
@@ -399,9 +443,9 @@ return [{ json: { to, subject: `Эрчим хүчний урьдчилсан т�
             "options": {},
         }),
         code(w, "И-мэйл бэлдэх", (1180, 300), mail),
-        email(w, "Тайлан илгээх (SMTP)", (1400, 300), "={{ $json.to }}", "={{ $json.subject }}", "={{ $json.text }}", "={{ $json.html }}"),
+        email(w, "Тайлан илгээх (" + MT() + ")", (1400, 300), "={{ $json.to }}", "={{ $json.subject }}", "={{ $json.text }}", "={{ $json.html }}"),
     ]
-    conn = main_conn("Webhook", "Тооцоо", "AI: зөвлөмж бичих", "Тайлан хадгалах", "Хариу буцаах", "И-мэйл бэлдэх", "Тайлан илгээх (SMTP)")
+    conn = main_conn("Webhook", "Тооцоо", "AI: зөвлөмж бичих", "Тайлан хадгалах", "Хариу буцаах", "И-мэйл бэлдэх", "Тайлан илгээх (" + MT() + ")")
     sub(conn, M(), "AI: зөвлөмж бичих", "ai_languageModel")
     return workflow("ebAgent4Energy00", "Агент 4 · Эрчим хүчний шинжилгээ", nodes, conn)
 
@@ -417,11 +461,12 @@ def apply_layout(wf):
 
 
 if __name__ == "__main__":
-    # workflows/gemini/*.json, workflows/claude/*.json — init.sh нь .env-ийн LLM_PROVIDER-ээр сонгоно
+    # workflows/<llm>/ (SMTP), workflows/<llm>-smtp2go/, workflows/<llm>-brevo/ — init.sh нь .env-ээр сонгоно
     for PROVIDER in ("gemini", "claude"):
-        d = OUT / PROVIDER
-        d.mkdir(parents=True, exist_ok=True)
-        for fn, build in [("1_booking_agent.json", wf_booking), ("2_chat_agent.json", wf_chat),
-                          ("3_content_agent.json", wf_content), ("4_energy_agent.json", wf_energy)]:
-            (d / fn).write_text(json.dumps(apply_layout(build()), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            print("✓", d / fn)
+        for MAILER in ("smtp", "smtp2go", "brevo"):
+            d = OUT / (PROVIDER if MAILER == "smtp" else PROVIDER + "-" + MAILER)
+            d.mkdir(parents=True, exist_ok=True)
+            for fn, build in [("1_booking_agent.json", wf_booking), ("2_chat_agent.json", wf_chat),
+                              ("3_content_agent.json", wf_content), ("4_energy_agent.json", wf_energy)]:
+                (d / fn).write_text(json.dumps(apply_layout(build()), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                print("✓", d / fn)

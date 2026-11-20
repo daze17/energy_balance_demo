@@ -17,6 +17,27 @@ Railway project «energy-balance-ebrd»
 - **Өгөгдлийн сан:** Postgres гаднаас хаалттай. Анх асахад вэб сервер `db/init/*.sql`-ийг автоматаар ачаална.
 - **Аюулгүй байдал:** n8n webhook-ууд `X-Internal-Token` header-гүй дуудлагыг 403-аар татгалзана; бүх нууц утга Railway variables болон локал `.env.railway`-д.
 
+## Жинхэнэ и-мэйл — SMTP2GO (үнэгүй 1000/сар)
+HTTPS API-аар илгээдэг тул Railway-ийн SMTP хоригт өртөхгүй.
+1. [smtp2go.com](https://www.smtp2go.com) дээр үнэгүй бүртгэл үүсгэнэ.
+2. **Sending → Verified Senders → Single sender emails** хэсэгт илгээгч и-мэйлээ нэмж баталгаажуулна.
+3. **Sending → API Keys → Add API Key** (`api-…`, 36 тэмдэгт).
+4. Railway-д тохируулна (n8n автоматаар дахин асна):
+```bash
+railway variables --service n8n --set SMTP2GO_API_KEY=api-... --set MAIL_FROM=баталгаажсан@хаяг --set STAFF_EMAIL=менежерийн@хаяг
+```
+Хоёр түлхүүр хоёулаа байвал SMTP2GO давуу; хоёуланг нь устгавал Mailpit руу буцна.
+
+## Жинхэнэ и-мэйл — Brevo (хоёр дахь сонголт, үнэгүй 300/өдөр)
+1. [brevo.com](https://www.brevo.com) дээр үнэгүй бүртгэл үүсгэнэ (карт шаардахгүй).
+2. **Senders, Domains & Dedicated IPs → Senders** хэсэгт илгээгч и-мэйлээ нэмж баталгаажуулна (жишээ нь `energybalance.mgl@gmail.com`).
+3. **SMTP & API → API Keys → Generate a new API key** (`xkeysib-…`).
+4. Railway-д тохируулна (n8n автоматаар дахин асна):
+```bash
+railway variables --service n8n --set BREVO_API_KEY=xkeysib-... --set MAIL_FROM=баталгаажсан@хаяг --set STAFF_EMAIL=менежерийн@хаяг
+```
+`BREVO_API_KEY`-г хоосон болгож устгавал Mailpit руу буцна. Локалд: `.env`-д `BREVO_API_KEY=`, `MAIL_FROM=` нэмээд `docker compose up -d`.
+
 ## Шинэчлэх
 ```bash
 railway up --service web --ci     # вэб код өөрчлөгдсөн бол

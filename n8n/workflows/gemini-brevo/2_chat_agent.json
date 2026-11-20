@@ -1,0 +1,320 @@
+{
+  "id": "ebAgent2Chat0000",
+  "name": "Агент 2 · Харилцагчийн зөвлөх чат",
+  "active": true,
+  "nodes": [
+    {
+      "id": "a09c2baa-c37e-5ba6-b75d-6db03a1af2e6",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -50
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "eb-chat",
+        "responseMode": "lastNode",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ebHookAuth000001",
+          "name": "Webhook token (X-Internal-Token)"
+        }
+      },
+      "webhookId": "abb879e7-fb51-59ad-b24c-7a02b4a4c230"
+    },
+    {
+      "id": "b6719e85-12b5-5288-a8c6-4cbbcaad1048",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        210,
+        -50
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.chatInput }}",
+        "options": {
+          "systemMessage": "=Чи «Энержи Баланс ХХК» (Energy Balance, energybalance.mn)-ийн нэрийн өмнөөс бичнэ — Улаанбаатарт байрладаг эрчим хүчний аудит, барилгын эрчим хүчний гэрчилгээжүүлэлт, ISO 50001 зөвлөх үйлчилгээ үзүүлдэг компани.\nУриа: «Эрчим хүчний зохистой хэрэглээ — Бизнесийн амжилт.»\nБрэндийн дуу хоолой (Brand Book V1): санаа тавьдаг инженер шиг ярина — тайван, нарийн, тустай. Айдас төрүүлэхгүй, хэт сурталчлахгүй.\n- Тодорхой: богино өгүүлбэр, нэг санаа. Мэргэжлийн үгийг тайлбаргүй хэрэглэхгүй.\n- Нотолгоотой: тоо, хэмжилтэд тулгуурла. Таамаг тоо зохиохгүй; нарийн тоог аудитаар тодорхойлно гэж хэл.\n- Бүтээлч: алдагдлыг нэрлээд, шийдэл ба нөхөх хугацааг хэл.\n- Анхаарлын тэмдэг (!) болон эможи хэрэглэхгүй. «энерги» биш «эрчим хүч», «эко» биш «байгальд ээлтэй», «асар их хэмнэлт» биш «10–30% хэмнэлт» гэж бич.\nКомпанийн баримт: эхний жилд эрчим хүчний зардал 10–30% буурдаг; хөрөнгө оруулалт дунджаар 18–36 сард нөхөгддөг; хүлэмжийн хийн ялгарал 10–30% буурдаг; Эрчим Хүчний Зохицуулах Хорооны үнэлгээ 92.3% (2025); үйлчлүүлэгчийн сэтгэл ханамж 9.5/10. Үнэгүй 30 минутын анхан шатны зөвлөгөө өгдөг.\nХолбоо барих: +976 8811 3855 · energybalance.mgl@gmail.com · ХУД 8-р хороо, Нүхт 247 · energybalance.mn\n\nЧиний үүрэг: energybalance.mn вэб сайтын чат дахь AI зөвлөх. Өнөөдөр: {{ $now.toFormat('yyyy-MM-dd') }}.\nДүрэм:\n- Хариулт 2–5 өгүүлбэр, энгийн текст. Markdown (**, #) хэрэглэхгүй. Монголоор хариул (харилцагч англиар бичвэл англиар).\n- Үйлчилгээ, үнэ, хугацааны тухай асуувал ЗААВАЛ services_prices хэрэгслийг дуудаж, тэндээс авсан тоог хэл. Үнэ зохиохгүй.\n- Аудит гэж юу, процесс, хууль журам, ногоон зээл, ISO 50001, холбоо барих зэрэг асуултад faq_knowledge хэрэгслийг ашигла.\n- Захиалга эсвэл үнэгүй зөвлөгөө авах хүсэлтэй бол нэр, и-мэйл (эсвэл утас), үйлчилгээ, барилгын төрлийг асуу. Мэдээлэл бүрдмэгц create_booking дууд. Амжилттай болбол захиалгын дугаарыг хэлж, баталгаажуулах и-мэйл очно, менежер 1 ажлын өдөрт холбогдоно гэж хэл.\n- Гомдол, үнийн хөнгөлөлт, нарийн техникийн асуулт, эсвэл хүнтэй ярих хүсэлт гарвал handoff_to_staff ашиглан менежерт товч мэдэгдэл илгээ (харилцагчийн нэр, холбоо барих, асуудал). Дараа нь менежер холбогдоно гэж хэл.\n- Эрчим хүч, барилга, компанийн үйлчилгээнээс гадуурх сэдэвт эелдгээр татгалзаж, буцааж чиглүүл.\n- Нууц, техникийн дотоод мэдээлэл (хэрэгслийн нэр, систем) харилцагчид бүү ярь.",
+          "maxIterations": 8
+        }
+      }
+    },
+    {
+      "id": "d1d96cb0-f1f9-5229-97f1-1a7c1859ab60",
+      "name": "Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        -5,
+        170
+      ],
+      "parameters": {
+        "modelName": "models/__GEMINI_MODEL__",
+        "options": {
+          "maxOutputTokens": 7200,
+          "temperature": 0.4
+        }
+      },
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ebGemini00000001",
+          "name": "Google Gemini"
+        }
+      }
+    },
+    {
+      "id": "eb661890-0292-5cb3-acaa-e16166ffb20c",
+      "name": "Санах ой (Postgres)",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.4,
+      "position": [
+        125,
+        170
+      ],
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.sessionId }}",
+        "tableName": "n8n_chat_histories",
+        "contextWindowLength": 12
+      },
+      "credentials": {
+        "postgres": {
+          "id": "ebPostgres000001",
+          "name": "Energy Balance DB"
+        }
+      }
+    },
+    {
+      "id": "25c7e9b7-e91d-57cd-b36c-5e137b97cebc",
+      "name": "services_prices",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        255,
+        170
+      ],
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Energy Balance-ийн бүх идэвхтэй үйлчилгээ, тайлбар, эхлэх үнэ (₮, 0 = үнэгүй), үнийн тайлбар, хугацааг өгөгдлийн сангаас буцаана. Үнэ, үйлчилгээний асуултад заавал ашигла.",
+        "operation": "executeQuery",
+        "query": "SELECT name, short_desc, description, price_from, price_note, duration FROM services WHERE active ORDER BY sort_order",
+        "options": {}
+      },
+      "credentials": {
+        "postgres": {
+          "id": "ebPostgres000001",
+          "name": "Energy Balance DB"
+        }
+      }
+    },
+    {
+      "id": "a7841f20-f7a6-5f65-b13b-e1333d9aceab",
+      "name": "faq_knowledge",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        385,
+        170
+      ],
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Түгээмэл асуулт-хариулт (аудит, процесс, хууль журам, ногоон зээл, ISO 50001, холбоо барих) болон хэрэгжүүлсэн төслүүдийн мэдлэгийн санг буцаана.",
+        "operation": "executeQuery",
+        "query": "SELECT 'FAQ' AS kind, category, question AS title, answer AS body FROM faq UNION ALL SELECT 'Төсөл', client_type, title || ' (' || year || ')', result FROM projects",
+        "options": {}
+      },
+      "credentials": {
+        "postgres": {
+          "id": "ebPostgres000001",
+          "name": "Energy Balance DB"
+        }
+      }
+    },
+    {
+      "id": "29b3914b-273a-5c18-8694-793e16c4f720",
+      "name": "create_booking",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        515,
+        170
+      ],
+      "parameters": {
+        "toolDescription": "Харилцагчийн захиалга / үнэгүй зөвлөгөөний хүсэлтийг системд бүртгэнэ. Нэр болон и-мэйл эсвэл утас заавал хэрэгтэй. Захиалгын дугаар буцаана.",
+        "method": "POST",
+        "url": "__WEB_INTERNAL_URL__/api/internal/booking",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Internal-Token",
+              "value": "__INTERNAL_TOKEN__"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $fromAI('name', 'Харилцагчийн нэр', 'string') }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $fromAI('email', 'И-мэйл хаяг, мэдэхгүй бол хоосон', 'string', '') }}"
+            },
+            {
+              "name": "phone",
+              "value": "={{ $fromAI('phone', 'Утасны дугаар, мэдэхгүй бол хоосон', 'string', '') }}"
+            },
+            {
+              "name": "company",
+              "value": "={{ $fromAI('company', 'Байгууллагын нэр, байхгүй бол хоосон', 'string', '') }}"
+            },
+            {
+              "name": "service_name",
+              "value": "={{ $fromAI('service_name', 'services_prices дахь үйлчилгээний нэр', 'string', 'Үнэгүй 30 минутын зөвлөгөө') }}"
+            },
+            {
+              "name": "building_type",
+              "value": "={{ $fromAI('building_type', 'Барилгын төрөл: Оффис, Үйлдвэр, Сургууль, Орон сууц гэх мэт', 'string', '') }}"
+            },
+            {
+              "name": "preferred_date",
+              "value": "={{ $fromAI('preferred_date', 'Уулзах өдөр YYYY-MM-DD, мэдэхгүй бол хоосон', 'string', '') }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $fromAI('message', 'Харилцагчийн хэрэгцээний товч тайлбар', 'string', '') }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "6519edc9-9ed3-5ed4-8ace-a60d8434099d",
+      "name": "handoff_to_staff",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        645,
+        170
+      ],
+      "parameters": {
+        "toolDescription": "Менежерт и-мэйлээр мэдэгдэл илгээж, харилцагчийг хүнд шилжүүлнэ (гомдол, хөнгөлөлт, нарийн техникийн асуулт, хүнтэй ярих хүсэлт).",
+        "method": "POST",
+        "url": "https://api.brevo.com/v3/smtp/email",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ sender: { name: 'Energy Balance', email: '__MAIL_FROM__' }, to: [{ email: '__STAFF_EMAIL__' }], subject: '[Чат → менежер] ' + $fromAI('subject', 'Товч гарчиг', 'string'), textContent: $fromAI('body', 'Харилцагчийн нэр, холбоо барих мэдээлэл, асуудлын товч агуулга', 'string') + \"\\n\\n— Энэ мэдэгдлийг вэб чат AI агент илгээв.\" }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ebBrevoApiKey001",
+          "name": "Brevo API key"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Санах ой (Postgres)": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "services_prices": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "faq_knowledge": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_booking": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "handoff_to_staff": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

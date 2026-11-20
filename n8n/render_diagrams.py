@@ -23,7 +23,16 @@ def _provider():
     return v or "gemini"
 
 
-WF_DIR = ROOT / "workflows" / _provider()
+# DIAGRAM_MAILER=smtp|brevo|smtp2go — зурагт аль и-мэйл хувилбарыг харуулах (анхдагч: онлайн хувилбарын Brevo)
+import os as _os
+_m = _os.environ.get("DIAGRAM_MAILER", "brevo")
+WF_DIR = ROOT / "workflows" / (_provider() if _m == "smtp" else f"{_provider()}-{_m}")
+
+
+def _mail_api(n):
+    """HTTP node нь и-мэйл API (Brevo/SMTP2GO) дуудаж байвал нэрийг нь буцаана."""
+    u = n.get("parameters", {}).get("url", "")
+    return "Brevo" if "brevo.com" in u else "SMTP2GO" if "smtp2go.com" in u else None
 OUT = ROOT.parent / "docs" / "workflows"
 
 TRIGGERS = {"n8n-nodes-base.webhook", "n8n-nodes-base.scheduleTrigger"}
@@ -33,7 +42,7 @@ SUB_ORDER = {"ai_languageModel": 0, "ai_memory": 1, "ai_outputParser": 2, "ai_to
 PORT_LABEL = {"ai_languageModel": "Chat Model*", "ai_memory": "Memory", "ai_tool": "Tool", "ai_outputParser": "Output Parser"}
 
 STICKY = {
-    "ebAgent1Booking0": ("Агент 1 · Захиалга баталгаажуулах", "Нүүр хуудасны форм → өгөгдлийн сан → AI хүн бүрт тохирсон баталгаажуулах и-мэйл бичнэ → SMTP-ээр илгээнэ → захиалгын төлөвийг «Илгээсэн» болгоно. Төрөл: Workflow + AI."),
+    "ebAgent1Booking0": ("Агент 1 · Захиалга баталгаажуулах", "Нүүр хуудасны форм → өгөгдлийн сан → AI хүн бүрт тохирсон баталгаажуулах и-мэйл бичнэ → харилцагчид илгээнэ → захиалгын төлөвийг «Илгээсэн» болгоно. Төрөл: Workflow + AI."),
     "ebAgent2Chat0000": ("Агент 2 · Харилцагчийн зөвлөх чат", "Вэб чат → AI Agent хэрэгслээ өөрөө сонгоно: үйлчилгээ, үнэ (DB), түгээмэл асуулт (DB), захиалга бүртгэх (API → Агент 1), менежерт шилжүүлэх (и-мэйл). Яриаг Postgres санах ойд хадгална. Төрөл: AI Agent."),
     "ebAgent3Content0": ("Агент 3 · Контент (Facebook)", "Админы товч эсвэл Да/Лх/Ба 09:00 → сэдэв сонгоно → AI Brand Book-ийн дуу хоолойгоор {caption, slides[]} JSON бэлдэнэ → «Хүлээгдэж буй» төлөвтэй хадгална → хүн батлахад Facebook-д гарна."),
     "ebAgent4Energy00": ("Агент 4 · Эрчим хүчний шинжилгээ", "Хэрэглээний өгөгдөл → Code: кВт·ц/м², CO₂, A–G зэрэглэл, зардал → AI хэмнэлтийн зөвлөмж → тайланг DB-д хадгална → вэбэд шууд хариу → харилцагчид и-мэйлээр илгээнэ."),
@@ -150,6 +159,8 @@ def icon(t, cx, cy, s=40):
 
 def subtitle(n):
     t, p = n["type"], n["parameters"]
+    if _mail_api(n):
+        return f"send: email ({_mail_api(n)} API)"
     if t.endswith(".webhook"):
         return f'{p.get("httpMethod", "GET")}: /{p.get("path", "")}'
     if t.endswith("scheduleTrigger"):
@@ -272,7 +283,7 @@ def render(wf):
         if kind == "sub":
             cx, cy, r = x + w / 2, y + h / 2, w / 2
             out.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="#fff" stroke="#C7C7C7" stroke-width="2" filter="url(#sh)"/>')
-            out.append(icon(t, cx, cy, 36))
+            out.append(icon('emailSendTool' if _mail_api(n) else t, cx, cy, 36))
             out.append(f'<rect x="{cx - 5}" y="{y - 5}" width="10" height="10" transform="rotate(45 {cx} {y})" fill="#fff" stroke="#8A8A8A" stroke-width="1.6"/>')
             out.append(label(cx - 80, y + h + 8, 160, name, subtitle(n)))
             continue
@@ -285,10 +296,10 @@ def render(wf):
             out.append(f'<circle cx="{x - 1}" cy="{y + h / 2}" r="5" fill="#C7C7C7"/>')
         out.append(f'<circle cx="{x + w + 1}" cy="{y + h / 2}" r="5.5" fill="#fff" stroke="#9A9A9A" stroke-width="1.6"/>')
         if kind == "wide":
-            out.append(icon(t, x + 42, y + h / 2, 38))
+            out.append(icon('emailSend' if _mail_api(n) else t, x + 42, y + h / 2, 38))
             out.append(label(x + 72, y + h / 2 - 20, w - 82, name, subtitle(n), align="left"))
         else:
-            out.append(icon(t, x + w / 2, y + h / 2, 44))
+            out.append(icon('emailSend' if _mail_api(n) else t, x + w / 2, y + h / 2, 44))
             out.append(label(x + w / 2 - 80, y + h + 8, 160, name, subtitle(n)))
     out.extend(ports)
     out.append(f'<text x="{W - PAD}" y="{H - 24}" text-anchor="end" font-family="Open Sans,Helvetica,sans-serif" font-size="11" fill="#AAAAAA">'

@@ -14,7 +14,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.sessions import SessionMiddleware
 
-from . import agents, db
+from . import agents, db, messenger
 from .admin import router as admin_router
 
 BASE = Path(__file__).parent
@@ -57,11 +57,13 @@ templates.env.globals["COMPANY"] = {
 }
 app.state.templates = templates
 app.include_router(admin_router)
+app.include_router(messenger.router)
 
 
 @app.on_event("startup")
 def ensure_admin():
     db.init_schema(os.environ.get("DB_INIT_DIR", "/app/db_init"))
+    messenger.init()
     db.run("ALTER TABLE posts ADD COLUMN IF NOT EXISTS fb_post_id TEXT")  # хуучин өгөгдлийн санд багана нэмнэ
     email = os.environ.get("ADMIN_EMAIL", "admin@energybalance.local")
     pw = os.environ.get("ADMIN_PASSWORD", "EnergyBalance2026")

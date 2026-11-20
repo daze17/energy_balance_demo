@@ -58,6 +58,8 @@ services:
       MAIL_FROM: ${MAIL_FROM:-info@energybalance.local}
       STAFF_EMAIL: ${STAFF_EMAIL:-manager@energybalance.local}
       INTERNAL_TOKEN: ${INTERNAL_TOKEN:-local-internal-token}
+      SMTP2GO_API_KEY: ${SMTP2GO_API_KEY:-}
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
       SMTP_HOST: ${SMTP_HOST:-mailpit}
       SMTP_PORT: ${SMTP_PORT:-1025}
       SMTP_USER: ${SMTP_USER:-}
@@ -106,6 +108,9 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-EnergyBalance2026}
       INTERNAL_TOKEN: ${INTERNAL_TOKEN:-local-internal-token}
       CHAT_ALLOWED_ORIGINS: ${CHAT_ALLOWED_ORIGINS:-*}
+      FB_VERIFY_TOKEN: ${FB_VERIFY_TOKEN:-}
+      FB_PAGE_TOKEN: ${FB_PAGE_TOKEN:-}
+      FB_APP_SECRET: ${FB_APP_SECRET:-}
       FB_PAGE_ID: ${FB_PAGE_ID:-}
       FB_PAGE_ACCESS_TOKEN: ${FB_PAGE_ACCESS_TOKEN:-}
       FB_GRAPH_VERSION: ${FB_GRAPH_VERSION:-}

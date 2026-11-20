@@ -1,0 +1,228 @@
+{
+  "id": "ebAgent1Booking0",
+  "name": "Агент 1 · Захиалга баталгаажуулах",
+  "active": true,
+  "nodes": [
+    {
+      "id": "243217a0-dc0b-5578-94dc-814d63a4a319",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -50
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "eb-booking",
+        "responseMode": "lastNode",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ebHookAuth000001",
+          "name": "Webhook token (X-Internal-Token)"
+        }
+      },
+      "webhookId": "bb69470e-a8dc-513f-bbaf-ec3da305999f"
+    },
+    {
+      "id": "73fff31d-684b-5180-a63b-77553e561d8d",
+      "name": "AI: и-мэйл бичих",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        210,
+        -50
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Захиалгын мэдээлэл:\nДугаар: #{{ $json.body.booking_id }}\nНэр: {{ $json.body.name }}\nБайгууллага: {{ $json.body.company || '—' }}\nҮйлчилгээ: {{ $json.body.service_name }}\nҮйлчилгээний тайлбар: {{ $json.body.service_desc }}\nҮнэ: {{ $json.body.service_price }}\nХугацаа: {{ $json.body.service_duration }}\nБарилгын төрөл: {{ $json.body.building_type || '—' }}\nХүссэн өдөр: {{ $json.body.preferred_date || 'тодорхойгүй' }}\nХарилцагчийн мессеж: {{ $json.body.message || '—' }}\nЭх сурвалж: {{ $json.body.source === 'chat' ? 'вэб чат агент' : 'вэб сайтын форм' }}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessagePromptTemplate",
+              "message": "Чи «Энержи Баланс ХХК» (Energy Balance, energybalance.mn)-ийн нэрийн өмнөөс бичнэ — Улаанбаатарт байрладаг эрчим хүчний аудит, барилгын эрчим хүчний гэрчилгээжүүлэлт, ISO 50001 зөвлөх үйлчилгээ үзүүлдэг компани.\nУриа: «Эрчим хүчний зохистой хэрэглээ — Бизнесийн амжилт.»\nБрэндийн дуу хоолой (Brand Book V1): санаа тавьдаг инженер шиг ярина — тайван, нарийн, тустай. Айдас төрүүлэхгүй, хэт сурталчлахгүй.\n- Тодорхой: богино өгүүлбэр, нэг санаа. Мэргэжлийн үгийг тайлбаргүй хэрэглэхгүй.\n- Нотолгоотой: тоо, хэмжилтэд тулгуурла. Таамаг тоо зохиохгүй; нарийн тоог аудитаар тодорхойлно гэж хэл.\n- Бүтээлч: алдагдлыг нэрлээд, шийдэл ба нөхөх хугацааг хэл.\n- Анхаарлын тэмдэг (!) болон эможи хэрэглэхгүй. «энерги» биш «эрчим хүч», «эко» биш «байгальд ээлтэй», «асар их хэмнэлт» биш «10–30% хэмнэлт» гэж бич.\nКомпанийн баримт: эхний жилд эрчим хүчний зардал 10–30% буурдаг; хөрөнгө оруулалт дунджаар 18–36 сард нөхөгддөг; хүлэмжийн хийн ялгарал 10–30% буурдаг; Эрчим Хүчний Зохицуулах Хорооны үнэлгээ 92.3% (2025); үйлчлүүлэгчийн сэтгэл ханамж 9.5/10. Үнэгүй 30 минутын анхан шатны зөвлөгөө өгдөг.\nХолбоо барих: +976 8811 3855 · energybalance.mgl@gmail.com · ХУД 8-р хороо, Нүхт 247 · energybalance.mn\n\nДаалгавар: вэб сайтаар ирсэн захиалгыг баталгаажуулах и-мэйлийн ИХ БИЕИЙГ бичнэ (гарчиг биш).\nШаардлага:\n- 110–170 үг, энгийн текст. Markdown (**, #) хэрэглэхгүй. Жагсаалтад «— » тэмдэг ашигла.\n- Бүтэц: 1) Нэрээр нь мэндлэх. 2) Захиалгыг хүлээн авснаа батлах: үйлчилгээ, хүссэн өдөр. 3) Тухайн хүний барилгын төрөл, мессежид тохирсон 1–2 өгүүлбэр: юуг шалгах, ямар үр дүн хүлээх (компанийн баримт тоог ашиглаж болно). 4) Дараагийн алхам: менежер 1 ажлын өдөрт холбогдож цагийг баталгаажуулна. 5) Уулзалтад бэлдэх 2–3 зүйл жагсаалтаар (жишээ нь сүүлийн 12 сарын цахилгаан, дулааны төлбөрийн баримт, барилгын талбай, зураг төсөл). 6) Гарын үсэг яг ингэж: «Хүндэтгэсэн,\nEnergy Balance баг\n+976 8811 3855 · energybalance.mn»\n- Үнийг зөвхөн өгөгдсөн мэдээллээр дурд, шинээр зохиохгүй."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "a0de8d1b-d97f-5cf5-bf1e-9b4659f211df",
+      "name": "Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        280,
+        170
+      ],
+      "parameters": {
+        "modelName": "models/__GEMINI_MODEL__",
+        "options": {
+          "maxOutputTokens": 6900,
+          "temperature": 0.4
+        }
+      },
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ebGemini00000001",
+          "name": "Google Gemini"
+        }
+      }
+    },
+    {
+      "id": "7198c5e8-dbae-5a9b-a1a5-44bf2a09cc5e",
+      "name": "И-мэйл бэлдэх",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        -50
+      ],
+      "parameters": {
+        "jsCode": "\nconst esc = s => String(s ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));\nfunction brandEmail(title, bodyHtml) {\n  return `<div style=\"background:#F4F7F4;padding:24px 0;font-family:Inter,Arial,sans-serif;color:#183A27\">\n  <div style=\"max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #E1E8E2\">\n    <div style=\"background:#1F5E3B;padding:18px 24px;color:#fff;letter-spacing:4px;font-size:13px\">ENERGY BALANCE</div>\n    <div style=\"padding:24px;font-size:15px;line-height:1.6\">\n      <div style=\"color:#3A8F5C;font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px\">${esc(title)}</div>\n      ${bodyHtml}\n    </div>\n    <div style=\"border-top:3px solid #8DC149;padding:16px 24px;font-size:12px;color:#3A8F5C\">\n      Энержи Баланс ХХК · +976 8811 3855 · energybalance.mn<br>Эрчим хүчний зохистой хэрэглээ — Бизнесийн амжилт.\n    </div>\n  </div></div>`;\n}\nconst textToHtml = t => esc(t).split(/\\n{2,}/).map(p => `<p style=\"margin:0 0 12px\">${p.replace(/\\n/g,'<br>')}</p>`).join('');\n\nconst b = $('Webhook').first().json.body;\nconst text = ($input.first().json.text || '').trim();\nconst subject = `Захиалга #${b.booking_id} хүлээн авлаа — ${b.service_name}`;\nconst facts = `<table style=\"width:100%;border-collapse:collapse;margin:4px 0 16px;font-size:14px\">\n  <tr><td style=\"padding:6px 0;color:#3A8F5C\">Захиалга</td><td style=\"padding:6px 0\"><b>#${esc(b.booking_id)}</b></td></tr>\n  <tr><td style=\"padding:6px 0;color:#3A8F5C\">Үйлчилгээ</td><td style=\"padding:6px 0\">${esc(b.service_name)}</td></tr>\n  <tr><td style=\"padding:6px 0;color:#3A8F5C\">Хүссэн өдөр</td><td style=\"padding:6px 0\">${esc(b.preferred_date || 'тохиролцоно')}</td></tr></table>`;\nreturn [{ json: { to: b.email, subject, text, booking_id: b.booking_id,\n  html: brandEmail('Захиалгын баталгаажуулалт', facts + textToHtml(text)) } }];\n"
+      }
+    },
+    {
+      "id": "ac803c65-32b2-5b82-b4dc-977e908b4be1",
+      "name": "И-мэйл илгээх (SMTP2GO)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        750,
+        -50
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.smtp2go.com/v3/email/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ sender: 'Energy Balance <__MAIL_FROM__>', to: [$json.to], subject: $json.subject, text_body: $json.text, html_body: $json.html }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ebSmtp2goKey0001",
+          "name": "SMTP2GO API key"
+        }
+      }
+    },
+    {
+      "id": "cada2087-ef51-5adc-a750-8e35cc01e401",
+      "name": "Төлөв шинэчлэх",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        960,
+        -50
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE bookings SET status = CASE WHEN status = 'Шинэ' THEN 'Илгээсэн' ELSE status END, confirmation_email = $1, confirmed_at = now() WHERE id = $2 RETURNING id, status",
+        "options": {
+          "queryReplacement": "={{ [ $('И-мэйл бэлдэх').item.json.text ] }},{{ [ $('И-мэйл бэлдэх').item.json.booking_id ] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "ebPostgres000001",
+          "name": "Energy Balance DB"
+        }
+      }
+    },
+    {
+      "id": "358de3be-d885-5afe-95ad-c6a81c2e591d",
+      "name": "Хариу",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1170,
+        -50
+      ],
+      "parameters": {
+        "jsCode": "const e = $('И-мэйл бэлдэх').first().json;\nreturn [{ json: { ok: true, booking_id: e.booking_id, status: $input.first().json.status, to: e.to, subject: e.subject, email: e.text } }];"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI: и-мэйл бичих",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: и-мэйл бичих": {
+      "main": [
+        [
+          {
+            "node": "И-мэйл бэлдэх",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "И-мэйл бэлдэх": {
+      "main": [
+        [
+          {
+            "node": "И-мэйл илгээх (SMTP2GO)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "И-мэйл илгээх (SMTP2GO)": {
+      "main": [
+        [
+          {
+            "node": "Төлөв шинэчлэх",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Төлөв шинэчлэх": {
+      "main": [
+        [
+          {
+            "node": "Хариу",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI: и-мэйл бичих",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

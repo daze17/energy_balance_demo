@@ -52,5 +52,23 @@
       "host": "https://generativelanguage.googleapis.com",
       "apiKey": "__GEMINI_API_KEY__"
     }
+  },
+  {
+    "id": "ebBrevoApiKey001",
+    "name": "Brevo API key",
+    "type": "httpHeaderAuth",
+    "data": {
+      "name": "api-key",
+      "value": "__BREVO_API_KEY__"
+    }
+  },
+  {
+    "id": "ebSmtp2goKey0001",
+    "name": "SMTP2GO API key",
+    "type": "httpHeaderAuth",
+    "data": {
+      "name": "X-Smtp2go-Api-Key",
+      "value": "__SMTP2GO_API_KEY__"
+    }
   }
 ]
